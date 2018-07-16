@@ -187,7 +187,7 @@ let langMapper = argv => {
             raise(
               fail(
                 classNameLoc,
-                "lang.class: class name must have length >= 2 and start with underscore _ followed by uppercase char. EX: class _MyClass = ...",
+                "@lang.class: class name must have length >= 2 and start with underscore _ followed by uppercase char. EX: class _MyClass = ...",
               ),
             );
           }
