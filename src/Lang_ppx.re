@@ -247,25 +247,26 @@ let langMapper = argv => {
         let fieldsRef = ref([]);
         let selfRef = ref(None);
 
+        let rec procInheritance = (list, acc) =>
+          switch (list) {
+          | [] => acc
+          | [{pcf_desc: Pcf_inherit(_, {pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, ...tail] =>
+            let identPaths = identPathToList(identPath, []);
+            let inheritClass = String.concat(".", identPaths);
+            print_endline("inherit: " ++ inheritClass);
+            procInheritance(tail, [identPaths, ...acc]);
+          | [head, ...tail] => procInheritance(tail, acc)
+          };
+
         let inheritances =
           switch (classExpr) {
           | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} =>
             fieldsRef := list;
             selfRef := Some(self);
-
-            let rec procInheritance = (list, acc) =>
-              switch (list) {
-              | [] => acc
-              | [{pcf_desc: Pcf_inherit(_, {pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, ...tail] =>
-                let identPaths = identPathToList(identPath, []);
-                let inheritClass = String.concat(".", identPaths);
-                print_endline("inherit: " ++ inheritClass);
-                procInheritance(tail, [identPaths, ...acc]);
-              | [head, ...tail] => procInheritance(tail, acc)
-              };
-
             procInheritance(list, []);
-          | _ => []
+          |{pcl_desc:(Pcl_constr (_, _)|Pcl_fun (_, _, _, _)|Pcl_apply (_, _)|
+            Pcl_let (_, _, _)|Pcl_constraint (_, _)|Pcl_extension _)} =>
+           
           };
 
         let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;

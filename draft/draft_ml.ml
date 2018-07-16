@@ -1,5 +1,5 @@
-class person =
+class _Person (name : string) =
   object (this : 'this)
-    inherit  Any.t as super
-    method! classInheritance = classInheritance
-  end
+    inherit  Lang.Any.t as super
+    method personName = "hehe name"
+  end[@@lang.class ]
