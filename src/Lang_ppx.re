@@ -299,7 +299,7 @@ let langMapper = argv => {
           [@metaloc nameLoc]
           [%str
             let id = __LOC__;
-            let name = __MODULE__;
+            let name = [%e stringToExpr(name)];
             let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
             Hashtbl.add(inheritance, id, name)
           ];

@@ -8,7 +8,7 @@ module Lang = {
   module Any = {
     module ClassType = {
       let id = __LOC__;
-      let name = __MODULE__;
+      let name = "Any";
       let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
       Hashtbl.add(inheritance, id, name);
 
@@ -48,4 +48,4 @@ class _TestClass = {
   pub name = "<<<<<wilton>>>>";
 };
 
-print_endline(Person.ClassType.id);
+print_endline(Person.ClassType.name);

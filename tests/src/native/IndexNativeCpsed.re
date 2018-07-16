@@ -5,7 +5,7 @@ module Lang = {
   module Any = {
     module ClassType = {
       let id = __LOC__;
-      let name = __MODULE__;
+      let name = "Any";
       let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
       Hashtbl.add(inheritance, id, name);
 
@@ -37,7 +37,7 @@ module Lang = {
 module Person = {
   module ClassType = {
     let id = __LOC__;
-    let name = __MODULE__;
+    let name = "Person";
     let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
     Hashtbl.add(inheritance, id, name);
     class t = {
@@ -57,7 +57,7 @@ module Person = {
 module TestClass = {
   module ClassType = {
     let id = __LOC__;
-    let name = __MODULE__;
+    let name = "TestClass";
     let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
     Hashtbl.add(inheritance, id, name);
     class t = {
@@ -74,4 +74,4 @@ module TestClass = {
   class t = class ClassType.t;
 };
 
-print_endline(Person.ClassType.id);
+print_endline(Person.ClassType.name);
