@@ -52,6 +52,20 @@ let continuationExpr = expr => Exp.attr(expr, ({txt: "langcontinuation", loc: de
 let matchesCpsApply = id =>
   id == "await" || id == "delay" || id |> endsWith("Cps") || id |> endsWith("Await") || id |> endsWith("Delay");
 
+let buildLongident = list => {
+  let rec buildLdot = (list, sum) =>
+    switch (list) {
+    | [] => sum
+    | [head] => Ldot(sum, head)
+    | [head, ...tail] => buildLdot(tail, Ldot(sum, head))
+    };
+
+  let ident = Lident(List.hd(list));
+  buildLdot(List.tl(list), ident);
+};
+
+let buildIdentExpr = (list, loc) => Exp.ident({txt: buildLongident(list), loc});
+
 let mkModuleStri = (name, loc, structure) => {
   pstr_loc: loc,
   pstr_desc:
@@ -166,7 +180,7 @@ let rec identPathToList = (identPath, acc) =>
   switch (identPath) {
   | Lident(txt) => [txt, ...acc]
   | Ldot(path, txt) => identPathToList(path, [txt, ...acc])
-  | _ => raise(Failure("Pattern not implementd yet!"))
+  | _ => raise(Failure("Pattern not implemented yet!"))
   };
 
 let langMapper = argv => {
@@ -181,7 +195,7 @@ let langMapper = argv => {
           pci_name: {txt: className, loc: classNameLoc},
           pci_expr: classExpr,
           pci_attributes: [({txt: "lang.class"}, payload)],
-        } as classDeclaration =>
+        } as _classDeclaration =>
         String.(
           if (className |> length < 2 || className.[0] != '_' || className.[1] != (className.[1] |> Char.uppercase)) {
             raise(
@@ -220,18 +234,6 @@ let langMapper = argv => {
 
         let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
 
-        let buildIdentPath = list => {
-          let rec buildLdot = (list, sum) =>
-            switch (list) {
-            | [] => sum
-            | [head] => Ldot(sum, head)
-            | [head, ...tail] => buildLdot(tail, Ldot(sum, head))
-            };
-
-          let ident = Lident(List.hd(list));
-          buildLdot(List.tl(list), ident);
-        };
-
         let beginPart =
           [@metaloc classNameLoc]
           [%str
@@ -245,13 +247,11 @@ let langMapper = argv => {
           inheritances
           |> List.map(it => {
                let modulePath = it |> List.rev |> List.tl |> List.rev;
-               let classInheritanceIdent =
-                 Exp.ident({txt: buildIdentPath(modulePath @ ["classInheritance"]), loc: classNameLoc});
-               let classIdIdent = Exp.ident({txt: buildIdentPath(modulePath @ ["classId"]), loc: classNameLoc});
-               let classNameIdent = Exp.ident({txt: buildIdentPath(modulePath @ ["className"]), loc: classNameLoc});
+               let moduleIdent = (txt) => buildIdentExpr(modulePath @ [txt], classNameLoc);
+              
                [%str
-                 Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e classInheritanceIdent]);
-                 Hashtbl.add(classInheritance, [%e classIdIdent], [%e classNameIdent])
+                 Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e moduleIdent("classInheritance")]);
+                 Hashtbl.add(classInheritance, [%e moduleIdent("classId")], [%e moduleIdent("className")])
                ];
              })
           |> List.flatten;
