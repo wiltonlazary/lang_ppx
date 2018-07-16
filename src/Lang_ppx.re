@@ -162,6 +162,13 @@ let mkLetIdentExpr = (recFlag, varName, varNameLoc, identName, constraintType, i
 
 let mkTryExpr = (expr, caseExprs) => Exp.try_(expr, caseExprs);
 
+let rec identPathToList = (identPath, acc) =>
+  switch (identPath) {
+  | Lident(txt) => [txt, ...acc]
+  | Ldot(path, txt) => identPathToList(path, [txt, ...acc])
+  | _ => raise(Failure("Pattern not implementd yet!"))
+  };
+
 let langMapper = argv => {
   ...default_mapper,
   structure_item: (mapper, structure_item) =>
@@ -179,49 +186,61 @@ let langMapper = argv => {
         let fieldsRef = ref([]);
         let selfRef = ref(None);
 
-        switch (classExpr) {
-        | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} =>
-          fieldsRef := list;
-          selfRef := Some(self);
+        let inheritances =
+          switch (classExpr) {
+          | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} =>
+            fieldsRef := list;
+            selfRef := Some(self);
 
-          let rec procInheritance = (list, acc) =>
-            switch (list) {
-            | [] => acc
-            | [
-                {
-                  pcf_desc:
-                    Pcf_inherit(
-                      _,
-                      {pcl_desc: [@implicit_arity] Pcl_constr({txt: Lident(inheritClassName)}, [])},
-                      _,
-                    ),
-                },
-                ...tail,
-              ] =>
-              print_endline("inherit: " ++ inheritClassName);
-              procInheritance(tail, [inheritClassName, ...acc]);
-            | [head, ...tail] => procInheritance(tail, acc)
-            };
+            let rec procInheritance = (list, acc) =>
+              switch (list) {
+              | [] => acc
+              | [{pcf_desc: Pcf_inherit(_, {pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, ...tail] =>
+                let identPaths = identPathToList(identPath, []);
+                let inheritClass = String.concat(".", identPaths);
+                print_endline("inherit: " ++ inheritClass);
+                procInheritance(tail, [inheritClass, ...acc]);
+              | [head, ...tail] => procInheritance(tail, acc)
+              };
 
-          let inherites = procInheritance(list, []);
-          print_endline("inherit declaration: " ++ string_of_int(List.length(inherites)));
-        | _ => ()
-        };
+            procInheritance(list, []);
+          | _ => []
+          };
 
-        [@metaloc classNameLoc]
-        [%stri
-          module M = {
-            class t = {
-              pub name = "<<<<<zzzzzz>>>>";
-            };
-          }
-        ];
+        let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
+        let getModuleName = str => String.sub(str, 0, String.length(str) - 2);
 
-        mkModuleStri(
-          String.capitalize(className),
-          classNameLoc,
-          [mkClassStri(virt, params, "t", classNameLoc, getSome(selfRef^), fieldsRef^)],
-        );
+        let beginPart =
+          [@metaloc classNameLoc]
+          [%str
+            let classId = __LOC__;
+            let className = __MODULE__;
+            let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
+            Hashtbl.add(classInheritance, classId, className)
+          ];
+
+        let classInheritanceAdd =
+          inheritances
+          |> List.map(it => {
+               let moduleName = getModuleName(it);
+               let ident = Exp.ident({txt: Lident(moduleName), loc: classNameLoc});
+               [%str
+                 Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e ident].classInheritance);
+                 Hashtbl.add(classInheritance, [%e ident].classId, [%e ident].className)
+               ];
+             })
+          |> List.flatten;
+
+        let endPart = [mkClassStri(virt, params, "t", classNameLoc, getSome(selfRef^), fieldsRef^)];
+
+        let res =
+          mkModuleStri(
+            String.capitalize(className),
+            classNameLoc,
+            List.concat([beginPart, classInheritanceAdd, endPart]),
+          );
+
+        default_mapper.structure_item(mapper, res);
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
     | _ => default_mapper.structure_item(mapper, structure_item)
