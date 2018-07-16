@@ -1,9 +1,6 @@
 module Lang = {
-  module type AnyClassType = {
-    let id : string;
-    let name : string;
-    let inheritance: Hashtbl.t(string, string)  ; 
-  };
+  external cast : 'a => 'b = "%identity";
+  module type AnyClassType = {let id: string; let name: string; let inheritance: Hashtbl.t(string, string);};
 
   module Any = {
     module ClassType = {
@@ -17,9 +14,9 @@ module Lang = {
         pub classInheritance = inheritance;
         pub classId = id;
         pub className = name;
-        pub is = (classType:(module AnyClassType)) =>{
+        pub is = (classType: (module AnyClassType)) => {
           module ClassType = (val (classType: (module AnyClassType)));
-  
+
           try (
             {
               this#classInheritance |. Hashtbl.find(ClassType.id) |. ignore;
@@ -28,24 +25,32 @@ module Lang = {
           ) {
           | _ => false
           };
-        }
+        };
       };
     };
 
     let classType: (module AnyClassType) = (module ClassType);
-    class t = ClassType.t;
-  }; 
+    class t = class ClassType.t;
+  };
 };
 
 [@lang.class]
 class _Person = {
   as (this: 'this);
+  inherit class Lang.Any.t as super;
+  pub personName = "hehe name";
 };
 
 [@lang.class]
 class _TestClass = {
-  inherit class Lang.Any.t as super;
-  pub name = "<<<<<wilton>>>>";
+  as (this: 'this);
+  inherit class Person.t as super;
+  pub personName2 = "<<<<<wilton>>>>";
 };
 
-print_endline(Person.ClassType.name);
+let person = (new Person.t :> Lang.Any.t);
+let testClass = new TestClass.t;
+let person: TestClass.t = Lang.cast(testClass);
+
+print_endline(person#personName2);
+print_endline(person#is(Person.classType) |> string_of_bool);
