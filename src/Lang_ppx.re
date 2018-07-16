@@ -320,6 +320,7 @@ let langMapper = argv => {
         let endPart =
           [@metaloc nameLoc]
           [%str
+            let classType: (module Lang.AnyClassType) = (module ClassType);
             class t = class ClassType.t
           ];
 

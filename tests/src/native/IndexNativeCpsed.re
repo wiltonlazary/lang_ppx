@@ -29,6 +29,7 @@ module Lang = {
       };
     };
 
+    let classType: (module AnyClassType) = (module ClassType);
     class t = class ClassType.t;
   };
 };
@@ -49,6 +50,7 @@ module Person = {
   };
   Hashtbl.iter((k, v) => Hashtbl.add(ClassType.inheritance, k, v), Lang.Any.ClassType.inheritance);
 
+  let classType: (module Lang.AnyClassType) = (module ClassType);
   class t = class ClassType.t;
 };
 
@@ -68,6 +70,7 @@ module TestClass = {
   };
   Hashtbl.iter((k, v) => Hashtbl.add(ClassType.inheritance, k, v), Lang.Any.ClassType.inheritance);
 
+  let classType: (module Lang.AnyClassType) = (module ClassType);
   class t = class ClassType.t;
 };
 

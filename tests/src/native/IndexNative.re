@@ -32,8 +32,7 @@ module Lang = {
       };
     };
 
-    /* let classType : ( module AnyClassType) = (val ClassType); */
-
+    let classType: (module AnyClassType) = (module ClassType);
     class t = ClassType.t;
   }; 
 };
