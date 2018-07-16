@@ -1,10 +1,11 @@
-[@lang.class]
-class testClass = {
-  as this;
-  inherit (class myOtherClass1) as super1;
-  inherit (class myOtherClass2) as super2;
-  pub name = "<<<<<wilton>>>>";
-};
+module Mod = {
+  let xxx = 1;
+  let zzz = 2;
 
-/* print_endline((new MyMod.t)#name); */
- 
+  [@lang.class]
+  class testClass = {
+    inherit class myOtherClass1 as super1;
+    inherit class myOtherClass2 as super2;
+    pub name = "<<<<<wilton>>>>";
+  };
+};
