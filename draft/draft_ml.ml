@@ -1,5 +1,1 @@
-class testClass =
-  object (this)
-    inherit  myOtherClass as super
-    method name = "<<<<<wilton>>>>"
-  end[@@lang.class ]
+module Mod = struct let x = 1 end

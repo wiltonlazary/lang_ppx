@@ -957,11 +957,11 @@ let langMapper = argv => {
       | {
           pci_virt: virt,
           pci_params: params,
-          pci_name: {txt, loc},
+          pci_name: {txt: className, loc: classNameLoc},
           pci_expr: expr,
           pci_attributes: [({txt: "lang.class"}, payload)],
         } =>
-        print_endline("class_declaration: " ++ txt);
+        print_endline("class_declaration: " ++ className);
 
         switch (expr) {
         | {pcl_desc: Pcl_structure({pcstr_fields: list})} =>
@@ -969,11 +969,18 @@ let langMapper = argv => {
             switch (list) {
             | [] => acc
             | [
-                {pcf_desc: Pcf_inherit(_, {pcl_desc: [@implicit_arity] Pcl_constr({txt: Lident(txt)}, [])}, _)},
+                {
+                  pcf_desc:
+                    Pcf_inherit(
+                      _,
+                      {pcl_desc: [@implicit_arity] Pcl_constr({txt: Lident(inheritClassName)}, [])},
+                      _,
+                    ),
+                },
                 ...tail,
               ] =>
-              print_endline("inherites: " ++ txt);
-              procInheritance(tail, [txt, ...acc])
+              print_endline("inherit: " ++ inheritClassName);
+              procInheritance(tail, [inheritClassName, ...acc]);
             | [head, ...tail] => procInheritance(tail, acc)
             };
 
@@ -982,14 +989,47 @@ let langMapper = argv => {
         | _ => ()
         };
 
-        [@metaloc loc]
+        [@metaloc classNameLoc]
         [%stri
-          module MyMod = {
+          module M = {
             class t = {
               pub name = "<<<<<zzzzzz>>>>";
             };
           }
-        ];
+        ]; 
+ 
+
+        {
+          pstr_loc:classNameLoc,
+          pstr_desc:
+            Pstr_module({
+              pmb_loc:classNameLoc,
+              pmb_attributes:[],
+              pmb_name: {
+                txt: "Mod",
+                loc:classNameLoc
+              },
+              pmb_expr: {
+                pmod_loc:classNameLoc,
+                pmod_attributes:[],
+                pmod_desc:
+                  Pmod_structure([
+                    {
+                      pstr_loc:classNameLoc,
+                      pstr_desc:
+                        [@implicit_arity]
+                        Pstr_value(
+                          Nonrecursive,
+                          [
+                             
+                          ],
+                        ),
+                    },
+                  ]),
+              },
+            }),
+        };
+
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
     | _ => default_mapper.structure_item(mapper, structure_item)
