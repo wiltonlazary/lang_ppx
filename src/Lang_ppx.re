@@ -94,7 +94,7 @@ let mkClassStructureDesc = (self, fields) => Pcl_structure({pcstr_self: self, pc
 
 let mkClassFunDesc = (self, fields) => Pcl_structure({pcstr_self: self, pcstr_fields: fields});
 
-let mkClassStri = (virt, params, name, loc, self, fields) => {
+let mkClassStri = (virt, params, name, loc, construction, self, fields) => {
   pstr_desc:
     Pstr_class([
       {
@@ -278,19 +278,19 @@ let langMapper = argv => {
           | _ => patternFail(~loc=nameLoc, "procConstruction")
           };
 
-        let (construction, selfPattern, classFields, inheritances) = procStructure(classExpr, []);
+        let (classConstruction, classSelf, classFields, classInheritance) = procStructure(classExpr, []);
         let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
 
-        let (inheritances, implicitInheritanceFields) =
-          if (inheritances |> List.length == 0) {
+        let (classInheritance, implicitInheritanceFields) =
+          if (classInheritance |> List.length == 0) {
             let res = [mkInheritLangAny(nameLoc)];
             ([["Lang", "Any", "t"]], res);
           } else {
-            (inheritances, []);
+            (classInheritance, []);
           };
 
         let inheritanceAdd =
-          inheritances
+          classInheritance
           |> List.map(it => {
                let classTypePath = (it |> List.rev |> List.tl |> List.rev) @ ["ClassType"];
                let inheritanceIdent = buildIdentExpr(classTypePath @ ["inheritance"], nameLoc);
@@ -321,7 +321,8 @@ let langMapper = argv => {
             params,
             "t",
             nameLoc,
-            selfPattern,
+            classConstruction,
+            classSelf,
             implicitInheritanceFields @ classFields @ inheritanceClassFields,
           ),
         ];
