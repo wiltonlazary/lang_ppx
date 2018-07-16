@@ -266,19 +266,19 @@ let langMapper = argv => {
           | [head, ...tail] => procInheritance(tail, acc)
           };
 
-        let rec procConstruction = (expr, acc) =>
+        let rec procStructure = (expr, acc) =>
           switch (expr) {
           | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} => (
-              procInheritance(list, []),
               List.rev(acc),
               self,
               list,
+              procInheritance(list, []),
             )
-          | {pcl_desc: Pcl_fun(p0, p1, p2, expr)} => procConstruction(expr, [(p0, p1, p2), ...acc])
+          | {pcl_desc: Pcl_fun(p0, p1, p2, expr)} => procStructure(expr, [(p0, p1, p2), ...acc])
           | _ => patternFail(~loc=nameLoc, "procConstruction")
           };
 
-        let (inheritances, construction, selfPattern, classFields) = procConstruction(classExpr, []);
+        let (construction, selfPattern, classFields, inheritances) = procStructure(classExpr, []);
         let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
 
         let (inheritances, implicitInheritanceFields) =
