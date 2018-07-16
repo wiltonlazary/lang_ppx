@@ -953,15 +953,24 @@ let langMapper = argv => {
   structure_item: (mapper, structure_item) =>
     switch (structure_item) {
     | {pstr_desc: Pstr_class(list)} =>
-      print_endline("Pstr_class: desc ");
+      switch (List.hd(list)) {
+      | {
+          pci_virt: virt,
+          pci_params: params,
+          pci_name: {txt, loc},
+          pci_expr: expr,
+          pci_attributes: [({txt: "lang.class"}, payload)],
+        } =>
+        print_endline("class_declaration: " ++ txt);
 
-      [%stri
-        module MyMod = {
-          class t = {
-            pub name = "<<<<<zzzzzz>>>>";
-          };
-        }
-      ];
+        [%stri
+          module MyMod = {
+            class t = {
+              pub name = "<<<<<zzzzzz>>>>";
+            };
+          }
+        ];
+      }
     | _ => default_mapper.structure_item(mapper, structure_item)
     },
 };

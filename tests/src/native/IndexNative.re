@@ -1,4 +1,4 @@
-[@xxclass]
+[@lang.class]
 class testClass = {
   pub name = "<<<<<wilton>>>>";
 };
