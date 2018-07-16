@@ -1,4 +1,13 @@
 [@ocaml.ppx.context {cookies: []}];
-module MtestClass = {
-  let x = 1;
+module Mod = {
+  let xxx = 1;
+  let zzz = 2;
+
+  module TestClass = {
+    class t = {
+      inherit class myOtherClass1 as super1;
+      inherit class myOtherClass2 as super2;
+      pub name = "<<<<<wilton>>>>";
+    };
+  };
 };
