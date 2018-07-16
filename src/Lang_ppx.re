@@ -240,7 +240,7 @@ let langMapper = argv => {
                 "@lang.class: class name must have length >= 2 and start with underscore _ followed by uppercase char. EX:\nclass _MyClass = {};",
               ),
             );
-           }
+          }
         );
 
         print_endline("class_declaration: " ++ name);
@@ -270,54 +270,60 @@ let langMapper = argv => {
 
         let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
 
+        let (inheritances, implicitInheritanceFields) =
+          if (inheritances |> List.length == 0) {
+            let res = [mkInheritLangAny(nameLoc)];
+            ([["Lang", "Any", "t"]], res);
+          } else {
+            (inheritances, []);
+          };
+
         let inheritanceAdd =
-        inheritances
-        |> List.map(it => {
-             let classTypePath = (it |> List.rev |> List.tl |> List.rev) @ ["ClassType"];
-             let inheritanceIdent = buildIdentExpr(classTypePath @ ["inheritance"], nameLoc);
+          inheritances
+          |> List.map(it => {
+               let classTypePath = (it |> List.rev |> List.tl |> List.rev) @ ["ClassType"];
+               let inheritanceIdent = buildIdentExpr(classTypePath @ ["inheritance"], nameLoc);
 
-             [%str
-               Hashtbl.iter(
-                 (k, v) => Hashtbl.add(ClassType.inheritance, k, v),
-                 [%e inheritanceIdent],
-               ); 
-             ];
-           })
-        |> List.flatten;
+               %str
+               Hashtbl.iter((k, v) => Hashtbl.add(ClassType.inheritance, k, v), [%e inheritanceIdent]);
+             })
+          |> List.flatten;
 
-      let inheritanceClassField =
-      mkMethodOverrideSimpleStri("classInheritance", buildLongident(["ClassType", "inheritance"]), nameLoc);
+        let inheritanceClassFields = [
+          mkMethodOverrideSimpleStri("classInheritance", buildLongident(["inheritance"]), nameLoc),
+          mkMethodOverrideSimpleStri("classId", buildLongident(["id"]), nameLoc),
+          mkMethodOverrideSimpleStri("className", buildLongident(["name"]), nameLoc),
+        ];
 
-      let inplicitInheritanceFields =
-      if (inheritances |> List.length == 0) {
-        [mkInheritLangAny(nameLoc)];
-      } else {
-        [];
-      };
+        let beginPart =
+          [@metaloc nameLoc]
+          [%str
+            let id = __LOC__;
+            let name = __MODULE__;
+            let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
+            Hashtbl.add(inheritance, id, name)
+          ];
 
-        let endPart = [
+        let classDeclItem = [
           mkClassStri(
             virt,
             params,
             "t",
             nameLoc,
             getSome(selfRef^),
-            inplicitInheritanceFields @ fieldsRef^ @ [inheritanceClassField],
+            implicitInheritanceFields @ fieldsRef^ @ inheritanceClassFields,
           ),
         ];
 
-        let beginPart =
+        let classTypePart = [mkModuleStri("ClassType", nameLoc, List.concat([beginPart, classDeclItem]))];
+
+        let endPart =
           [@metaloc nameLoc]
           [%str
-            module ClassType = {
-              let id = __LOC__;
-              let name = __MODULE__;
-              let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
-              Hashtbl.add(inheritance, id, name);
-            }
+            class t = class ClassType.t
           ];
 
-        mkModuleStri(String.capitalize(name), nameLoc, List.concat([beginPart, inheritanceAdd, endPart]));
+        mkModuleStri(String.capitalize(name), nameLoc, List.concat([classTypePart, inheritanceAdd, endPart]));
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
     | _ => default_mapper.structure_item(mapper, structure_item)

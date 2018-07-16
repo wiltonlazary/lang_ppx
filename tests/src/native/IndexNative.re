@@ -14,8 +14,9 @@ module Lang = {
 
       class t = {
         as (this: 'this);
-        pub classInheritance = ClassType.inheritance;
-        pub className = ClassType.name;
+        pub classInheritance = inheritance;
+        pub classId = id;
+        pub className = name;
         pub is = (classType:(module AnyClassType)) =>{
           module ClassType = (val (classType: (module AnyClassType)));
   
