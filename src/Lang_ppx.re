@@ -13,7 +13,13 @@ let getSome = opt =>
 
 let debugln = print_endline;
 
-let fail = (loc, txt) => raise(Location.Error(Location.error(~loc, txt)));
+let fail = (~loc=?, txt) => raise(Location.Error(Location.error(~loc?, txt)));
+
+let patternFail = (~loc=?, tag) =>
+  switch (loc) {
+  | None => raise(Failure(tag ++ ": pattern not implemented yet!"))
+  | Some(loc) => raise(Location.Error(Location.error(~loc, tag ++ ": pattern not implemented yet!")))
+  };
 
 let emptyPstr = PStr([]);
 
@@ -216,7 +222,7 @@ let rec identPathToList = (identPath, acc) =>
   switch (identPath) {
   | Lident(txt) => [txt, ...acc]
   | Ldot(path, txt) => identPathToList(path, [txt, ...acc])
-  | _ => raise(Failure("Pattern not implemented yet!"))
+  | _ => raise(Failure("identPathToList: Pattern not implemented yet!"))
   };
 
 let langMapper = argv => {
@@ -236,7 +242,7 @@ let langMapper = argv => {
           if (name |> length < 2 || name.[0] != '_' || name.[1] != (name.[1] |> Char.uppercase)) {
             raise(
               fail(
-                nameLoc,
+                ~loc=nameLoc,
                 "@lang.class: class name must have length >= 2 and start with underscore _ followed by uppercase char. EX:\nclass _MyClass = {};",
               ),
             );
@@ -269,6 +275,7 @@ let langMapper = argv => {
             fieldsRef := list;
             selfRef := Some(self);
             procInheritance(list, []);
+          | _ => patternFail(~loc=nameLoc, "inheritances")
           };
 
         let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
