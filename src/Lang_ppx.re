@@ -228,22 +228,22 @@ let langMapper = argv => {
       | {
           pci_virt: virt,
           pci_params: params,
-          pci_name: {txt: className, loc: classNameLoc},
+          pci_name: {txt: name, loc: nameLoc},
           pci_expr: classExpr,
           pci_attributes: [({txt: "lang.class"}, payload)],
         } as _classDeclaration =>
         String.(
-          if (className |> length < 2 || className.[0] != '_' || className.[1] != (className.[1] |> Char.uppercase)) {
+          if (name |> length < 2 || name.[0] != '_' || name.[1] != (name.[1] |> Char.uppercase)) {
             raise(
               fail(
-                classNameLoc,
+                nameLoc,
                 "@lang.class: class name must have length >= 2 and start with underscore _ followed by uppercase char. EX:\nclass _MyClass = {};",
               ),
             );
-          }
+           }
         );
 
-        print_endline("class_declaration: " ++ className);
+        print_endline("class_declaration: " ++ name);
         let fieldsRef = ref([]);
         let selfRef = ref(None);
 
@@ -268,55 +268,56 @@ let langMapper = argv => {
           | _ => []
           };
 
-        let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
+        let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
 
-        let beginPart =
-          [@metaloc classNameLoc]
-          [%str
-            let classId = __LOC__;
-            let className = __MODULE__;
-            let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
-            Hashtbl.add(classInheritance, classId, className)
-          ];
+        let inheritanceAdd =
+        inheritances
+        |> List.map(it => {
+             let classTypePath = (it |> List.rev |> List.tl |> List.rev) @ ["ClassType"];
+             let inheritanceIdent = buildIdentExpr(classTypePath @ ["inheritance"], nameLoc);
 
-        let classInheritanceAdd =
-          inheritances
-          |> List.map(it => {
-               let modulePath = it |> List.rev |> List.tl |> List.rev;
-               let moduleIdent = txt => buildIdentExpr(modulePath @ [txt], classNameLoc);
+             [%str
+               Hashtbl.iter(
+                 (k, v) => Hashtbl.add(ClassType.inheritance, k, v),
+                 [%e inheritanceIdent],
+               ); 
+             ];
+           })
+        |> List.flatten;
 
-               [%str
-                 Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e moduleIdent("classInheritance")]);
-                 Hashtbl.add(classInheritance, [%e moduleIdent("classId")], [%e moduleIdent("className")])
-               ];
-             })
-          |> List.flatten;
+      let inheritanceClassField =
+      mkMethodOverrideSimpleStri("classInheritance", buildLongident(["ClassType", "inheritance"]), nameLoc);
 
-        let inplicitInheritanceFields =
-          if (inheritances |> List.length == 0) {
-            [mkInheritLangAny(classNameLoc)];
-          } else {
-            [];
-          };
+      let inplicitInheritanceFields =
+      if (inheritances |> List.length == 0) {
+        [mkInheritLangAny(nameLoc)];
+      } else {
+        [];
+      };
 
-        let inheritanceClassField =
-          mkMethodOverrideSimpleStri("classInheritance", buildLongident(["classInheritance"]), classNameLoc);
         let endPart = [
           mkClassStri(
             virt,
             params,
             "t",
-            classNameLoc,
+            nameLoc,
             getSome(selfRef^),
             inplicitInheritanceFields @ fieldsRef^ @ [inheritanceClassField],
           ),
         ];
 
-        mkModuleStri(
-          String.capitalize(className),
-          classNameLoc,
-          List.concat([beginPart, classInheritanceAdd, endPart]),
-        );
+        let beginPart =
+          [@metaloc nameLoc]
+          [%str
+            module ClassType = {
+              let id = __LOC__;
+              let name = __MODULE__;
+              let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
+              Hashtbl.add(inheritance, id, name);
+            }
+          ];
+
+        mkModuleStri(String.capitalize(name), nameLoc, List.concat([beginPart, inheritanceAdd, endPart]));
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
     | _ => default_mapper.structure_item(mapper, structure_item)

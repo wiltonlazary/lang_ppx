@@ -1,30 +1,30 @@
 module Lang = {
   module type AnyClassType = {
-    let classId : string;
-    let className : string;
-    let classInheritance: Hashtbl.t(string, string)  ; 
+    let id : string;
+    let name : string;
+    let inheritance: Hashtbl.t(string, string)  ; 
   };
 
   module Any = {
     module ClassType = {
-      let classId = __LOC__;
-      let className = __MODULE__;
-      let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
-      Hashtbl.add(classInheritance, classId, className);
+      let id = __LOC__;
+      let name = __MODULE__;
+      let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
+      Hashtbl.add(inheritance, id, name);
     };
 
-    let classType : ( module AnyClassType) = val ClassType;
+    /* let classType : ( module AnyClassType) = (val ClassType); */
 
     class t = {
       as (this: 'this);
-      pub classInheritance = classInheritance;
-      pub className = className;
+      pub classInheritance = ClassType.inheritance;
+      pub className = ClassType.name;
       pub is = (classType:(module AnyClassType)) =>{
         module ClassType = (val (classType: (module AnyClassType)));
 
         try (
           {
-            this#classInheritance |. Hashtbl.find(ClassType.classId) |. ignore;
+            this#classInheritance |. Hashtbl.find(ClassType.id) |. ignore;
             true;
           }
         ) {
@@ -32,7 +32,7 @@ module Lang = {
         };
       }
     };
-  };
+  }; 
 };
 
 [@lang.class]
@@ -46,4 +46,4 @@ class _TestClass = {
   pub name = "<<<<<wilton>>>>";
 };
 
-print_endline(Person.classId);
+print_endline(Person.ClassType.id);
