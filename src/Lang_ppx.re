@@ -963,6 +963,13 @@ let langMapper = argv => {
         } =>
         print_endline("class_declaration: " ++ txt);
 
+        switch (expr) {
+          |  {pcl_desc: Pcl_structure({ pcstr_fields: []})}=>
+          ();
+          | _=>();
+         };
+
+        [@metaloc loc]
         [%stri
           module MyMod = {
             class t = {
@@ -970,6 +977,7 @@ let langMapper = argv => {
             };
           }
         ];
+      | _ => default_mapper.structure_item(mapper, structure_item)
       }
     | _ => default_mapper.structure_item(mapper, structure_item)
     },

@@ -1,1 +1,5 @@
-class testClass = object (this) method name = "wilton" end[@@xxclass ]
+class testClass =
+  object (this)
+    inherit  myOtherClass as super
+    method name = "<<<<<wilton>>>>"
+  end[@@lang.class ]
