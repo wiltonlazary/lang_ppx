@@ -182,6 +182,17 @@ let langMapper = argv => {
           pci_expr: classExpr,
           pci_attributes: [({txt: "lang.class"}, payload)],
         } as classDeclaration =>
+        String.(
+          if (className |> length < 2 || className.[0] != '_' || className.[1] != (className.[1] |> Char.uppercase)) {
+            raise(
+              fail(
+                classNameLoc,
+                "lang.class: class name must have length >= 2 and start with underscore _ followed by uppercase char. EX: class _MyClass = ...",
+              ),
+            );
+          }
+        );
+
         print_endline("class_declaration: " ++ className);
         let fieldsRef = ref([]);
         let selfRef = ref(None);
@@ -208,7 +219,6 @@ let langMapper = argv => {
           };
 
         let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
-        let getModuleName = str => String.sub(str, 0, String.length(str) - 2);
 
         let buildIdentPath = list => {
           let rec buildLdot = (list, sum) =>
