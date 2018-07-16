@@ -199,7 +199,7 @@ let langMapper = argv => {
                 let identPaths = identPathToList(identPath, []);
                 let inheritClass = String.concat(".", identPaths);
                 print_endline("inherit: " ++ inheritClass);
-                procInheritance(tail, [inheritClass, ...acc]);
+                procInheritance(tail, [identPaths, ...acc]);
               | [head, ...tail] => procInheritance(tail, acc)
               };
 
@@ -209,6 +209,18 @@ let langMapper = argv => {
 
         let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
         let getModuleName = str => String.sub(str, 0, String.length(str) - 2);
+
+        let buildIdentPath = list => {
+          let rec buildLdot = (list, sum) =>
+            switch (list) {
+            | [] => sum
+            | [head] => Ldot(sum, head)
+            | [head, ...tail] => buildLdot(tail, Ldot(sum, head))
+            };
+
+          let ident = Lident(List.hd(list));
+          buildLdot(List.tl(list), ident);
+        };
 
         let beginPart =
           [@metaloc classNameLoc]
@@ -222,25 +234,25 @@ let langMapper = argv => {
         let classInheritanceAdd =
           inheritances
           |> List.map(it => {
-               let moduleName = getModuleName(it);
-               let ident = Exp.ident({txt: Lident(moduleName), loc: classNameLoc});
+               let modulePath = it |> List.rev |> List.tl |> List.rev;
+               let classInheritanceIdent =
+                 Exp.ident({txt: buildIdentPath(modulePath @ ["classInheritance"]), loc: classNameLoc});
+               let classIdIdent = Exp.ident({txt: buildIdentPath(modulePath @ ["classId"]), loc: classNameLoc});
+               let classNameIdent = Exp.ident({txt: buildIdentPath(modulePath @ ["className"]), loc: classNameLoc});
                [%str
-                 Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e ident].classInheritance);
-                 Hashtbl.add(classInheritance, [%e ident].classId, [%e ident].className)
+                 Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e classInheritanceIdent]);
+                 Hashtbl.add(classInheritance, [%e classIdIdent], [%e classNameIdent])
                ];
              })
           |> List.flatten;
 
         let endPart = [mkClassStri(virt, params, "t", classNameLoc, getSome(selfRef^), fieldsRef^)];
 
-        let res =
-          mkModuleStri(
-            String.capitalize(className),
-            classNameLoc,
-            List.concat([beginPart, classInheritanceAdd, endPart]),
-          );
-
-        default_mapper.structure_item(mapper, res);
+        mkModuleStri(
+          String.capitalize(className),
+          classNameLoc,
+          List.concat([beginPart, classInheritanceAdd, endPart]),
+        );
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
     | _ => default_mapper.structure_item(mapper, structure_item)
