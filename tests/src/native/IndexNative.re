@@ -11,27 +11,29 @@ module Lang = {
       let name = __MODULE__;
       let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
       Hashtbl.add(inheritance, id, name);
+
+      class t = {
+        as (this: 'this);
+        pub classInheritance = ClassType.inheritance;
+        pub className = ClassType.name;
+        pub is = (classType:(module AnyClassType)) =>{
+          module ClassType = (val (classType: (module AnyClassType)));
+  
+          try (
+            {
+              this#classInheritance |. Hashtbl.find(ClassType.id) |. ignore;
+              true;
+            }
+          ) {
+          | _ => false
+          };
+        }
+      };
     };
 
     /* let classType : ( module AnyClassType) = (val ClassType); */
 
-    class t = {
-      as (this: 'this);
-      pub classInheritance = ClassType.inheritance;
-      pub className = ClassType.name;
-      pub is = (classType:(module AnyClassType)) =>{
-        module ClassType = (val (classType: (module AnyClassType)));
-
-        try (
-          {
-            this#classInheritance |. Hashtbl.find(ClassType.id) |. ignore;
-            true;
-          }
-        ) {
-        | _ => false
-        };
-      }
-    };
+    class t = ClassType.t;
   }; 
 };
 
