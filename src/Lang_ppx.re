@@ -965,13 +965,15 @@ let langMapper = argv => {
 
         switch (expr) {
         | {pcl_desc: Pcl_structure({pcstr_fields: list})} =>
-          let rec procInheritance = list =>
+          let rec procInheritance = (list, acc) =>
             switch (list) {
-            | [] => ()
-            | [{pcf_desc: Pcf_inherit(_)}, ...tail] => ()
+            | [] => acc
+            | [{pcf_desc: Pcf_inherit(_, item, _)}, ...tail] => procInheritance(tail, [item, ...acc])
+            | [head, ...tail] => procInheritance(tail, acc)
             };
 
-          print_endline("inherit declaration: ");
+          let inherites = procInheritance(list, []);
+          print_endline("inherit declaration: "++ string_of_int(List.length(inherites)));
         | _ => ()
         };
 
