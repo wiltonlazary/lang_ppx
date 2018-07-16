@@ -40,7 +40,7 @@ let getExpr = (payload, loc) =>
   Parsetree.(
     switch (payload) {
     | PStr([{pstr_desc: Pstr_eval(expr, _)}]) => expr
-    | _ => fail(loc, "must contain an expression")
+    | _ => fail(loc, "getExpr: must contain an expression")
     }
   );
 
@@ -264,7 +264,6 @@ let langMapper = argv => {
           | [head, ...tail] => procInheritance(tail, acc)
           };
 
-        /*//TODO more patterns*/
         let inheritances =
           switch (classExpr) {
           | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} =>
