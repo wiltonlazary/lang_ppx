@@ -964,10 +964,16 @@ let langMapper = argv => {
         print_endline("class_declaration: " ++ txt);
 
         switch (expr) {
-          |  {pcl_desc: Pcl_structure({ pcstr_fields: []})}=>
-          ();
-          | _=>();
-         };
+        | {pcl_desc: Pcl_structure({pcstr_fields: list})} =>
+          let rec procInheritance = list =>
+            switch (list) {
+            | [] => ()
+            | [{pcf_desc: Pcf_inherit(_)}, ...tail] => ()
+            };
+
+          print_endline("inherit declaration: ");
+        | _ => ()
+        };
 
         [@metaloc loc]
         [%stri
