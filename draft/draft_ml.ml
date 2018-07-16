@@ -1,0 +1,1 @@
+class testClass = object (this) method name = "wilton" end[@@xxclass ]

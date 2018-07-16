@@ -1,0 +1,34 @@
+{
+    "name": "lang_ppx_test",
+    "ppx-flags": [
+        "../lang_ppx.exe"
+    ],
+    "sources": [{
+        "dir": "src",
+        "subdirs": [{
+            "dir": "native",
+            "backend": "native",
+            "subdirs": true
+        }, {
+            "dir": "js",
+            "backend": "js",
+            "subdirs": true
+        }, {
+            "dir": "bytecode",
+            "backend": "bytecode",
+            "subdirs": true
+        }]
+    }],
+    "entries": [{
+        "backend": "native",
+        "main-module": "IndexNative"
+    }, {
+        "backend": "bytecode",
+        "main-module": "IndexBytecode"
+    }, {
+        "backend": "js",
+        "main-module": "IndexJs"
+    }],
+    "refmt": 3,
+    "bsc-flags": ["-bs-super-errors"]
+}

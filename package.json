@@ -1,0 +1,22 @@
+{
+    "name": "lang_ppx",
+    "version": "0.0.1",
+    "description": "lang PPX rewriter for Bucklescript/ReasonML",
+    "main": "index.js",
+    "repository": "https://github.com/wiltonlazary/lang_ppx",
+    "author": "Wilton Lazary <wiltonlazary@gmail.com>",
+    "license": "BSD-3-Clause",
+    "bin": {
+        "send-introspection-query": "./sendIntrospectionQuery.js"
+    },
+    "scripts": {
+        "postinstall": "node copyPlatformBinaryInPlace.js"
+    },
+    "devDependencies": {
+        "bs-platform": "file:../../../../../../../../../../home/fox/build/bsb-native"
+    },
+    "dependencies": {
+        "request": "^2.82.0",
+        "yargs": "^11.0.0"
+    }
+}

@@ -1,0 +1,12 @@
+.repository/
+/_build
+/bin
+/node_modules
+/tests/lib
+/lib
+/ppx
+/red
+jbuild.flags
+.merlin
+*.exe
+*.lock

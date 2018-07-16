@@ -1,0 +1,5 @@
+(jbuild_version 1)
+
+(alias
+ ((name lang_ppx)
+  (deps (src/lang_ppx.exe))))
