@@ -106,6 +106,42 @@ let mkClassStri = (virt, params, name, loc, self, fields) => {
   pstr_loc: loc,
 };
 
+let mkMethodOverrideSimpleStri = (name, lident, loc) => {
+  pcf_desc:
+    [@implicit_arity]
+    Pcf_method(
+      {txt: name, loc},
+      Public,
+      Cfk_concrete(
+        Override,
+        {
+          pexp_desc:
+            Pexp_poly({pexp_desc: Pexp_ident({txt: lident, loc}), pexp_loc: loc, pexp_attributes: []}, None),
+          pexp_loc: loc,
+          pexp_attributes: [],
+        },
+      ),
+    ),
+  pcf_loc: loc,
+  pcf_attributes: [],
+};
+
+let mkInheritLangAny = loc => {
+  pcf_desc:
+    [@implicit_arity]
+    Pcf_inherit(
+      Fresh,
+      {
+        pcl_desc: Pcl_constr({txt: Ldot(Ldot(Lident("Lang"), "Any"), "t"), loc}, []),
+        pcl_loc: loc,
+        pcl_attributes: [],
+      },
+      Some("super"),
+    ),
+  pcf_loc: loc,
+  pcf_attributes: [],
+};
+
 let mkLetExpr = (recFlag, varName, varNameLoc, expr, constraintType, inExpr) =>
   Exp.mk(
     Pexp_let(
@@ -247,8 +283,8 @@ let langMapper = argv => {
           inheritances
           |> List.map(it => {
                let modulePath = it |> List.rev |> List.tl |> List.rev;
-               let moduleIdent = (txt) => buildIdentExpr(modulePath @ [txt], classNameLoc);
-              
+               let moduleIdent = txt => buildIdentExpr(modulePath @ [txt], classNameLoc);
+
                [%str
                  Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e moduleIdent("classInheritance")]);
                  Hashtbl.add(classInheritance, [%e moduleIdent("classId")], [%e moduleIdent("className")])
@@ -256,7 +292,25 @@ let langMapper = argv => {
              })
           |> List.flatten;
 
-        let endPart = [mkClassStri(virt, params, "t", classNameLoc, getSome(selfRef^), fieldsRef^)];
+        let inplicitInheritanceFields =
+          if (inheritances |> List.length == 0) {
+            [mkInheritLangAny(classNameLoc)];
+          } else {
+            [];
+          };
+
+        let inheritanceClassField =
+          mkMethodOverrideSimpleStri("classInheritance", buildLongident(["classInheritance"]), classNameLoc);
+        let endPart = [
+          mkClassStri(
+            virt,
+            params,
+            "t",
+            classNameLoc,
+            getSome(selfRef^),
+            inplicitInheritanceFields @ fieldsRef^ @ [inheritanceClassField],
+          ),
+        ];
 
         mkModuleStri(
           String.capitalize(className),

@@ -6,62 +6,103 @@
           pci_virt: Concrete,
           pci_params: [],
           pci_name: {
-            txt: "_TestClass",
+            txt: "person",
             loc: {
               loc_start: {
                 pos_fname: "draft/draft_ml.ml",
                 pos_lnum: 1,
                 pos_bol: 0,
-                pos_cnum: 6
+                pos_cnum: 6,
               },
               loc_end: {
                 pos_fname: "draft/draft_ml.ml",
                 pos_lnum: 1,
                 pos_bol: 0,
-                pos_cnum: 16
+                pos_cnum: 12,
               },
-              loc_ghost: false
-            }
+              loc_ghost: false,
+            },
           },
           pci_expr: {
             pcl_desc:
               Pcl_structure({
                 pcstr_self: {
                   ppat_desc:
-                    Ppat_var({
-                      txt: "this",
-                      loc: {
-                        loc_start: {
-                          pos_fname: "draft/draft_ml.ml",
-                          pos_lnum: 2,
-                          pos_bol: 19,
-                          pos_cnum: 29
+                    [@implicit_arity]
+                    Ppat_constraint(
+                      {
+                        ppat_desc:
+                          Ppat_var({
+                            txt: "this",
+                            loc: {
+                              loc_start: {
+                                pos_fname: "draft/draft_ml.ml",
+                                pos_lnum: 2,
+                                pos_bol: 15,
+                                pos_cnum: 25,
+                              },
+                              loc_end: {
+                                pos_fname: "draft/draft_ml.ml",
+                                pos_lnum: 2,
+                                pos_bol: 15,
+                                pos_cnum: 29,
+                              },
+                              loc_ghost: false,
+                            },
+                          }),
+                        ppat_loc: {
+                          loc_start: {
+                            pos_fname: "draft/draft_ml.ml",
+                            pos_lnum: 2,
+                            pos_bol: 15,
+                            pos_cnum: 25,
+                          },
+                          loc_end: {
+                            pos_fname: "draft/draft_ml.ml",
+                            pos_lnum: 2,
+                            pos_bol: 15,
+                            pos_cnum: 29,
+                          },
+                          loc_ghost: false,
                         },
-                        loc_end: {
-                          pos_fname: "draft/draft_ml.ml",
-                          pos_lnum: 2,
-                          pos_bol: 19,
-                          pos_cnum: 33
+                        ppat_attributes: [],
+                      },
+                      {
+                        ptyp_desc: Ptyp_var("this"),
+                        ptyp_loc: {
+                          loc_start: {
+                            pos_fname: "draft/draft_ml.ml",
+                            pos_lnum: 2,
+                            pos_bol: 15,
+                            pos_cnum: 32,
+                          },
+                          loc_end: {
+                            pos_fname: "draft/draft_ml.ml",
+                            pos_lnum: 2,
+                            pos_bol: 15,
+                            pos_cnum: 37,
+                          },
+                          loc_ghost: false,
                         },
-                        loc_ghost: false
-                      }
-                    }),
+                        ptyp_attributes: [],
+                      },
+                    ),
                   ppat_loc: {
                     loc_start: {
                       pos_fname: "draft/draft_ml.ml",
                       pos_lnum: 2,
-                      pos_bol: 19,
-                      pos_cnum: 28
+                      pos_bol: 15,
+                      pos_cnum: 24,
                     },
                     loc_end: {
                       pos_fname: "draft/draft_ml.ml",
                       pos_lnum: 2,
-                      pos_bol: 19,
-                      pos_cnum: 34
+                      pos_bol: 15,
+                      pos_cnum: 38,
                     },
-                    loc_ghost: false
+                    loc_ghost: false,
                   },
-                  ppat_attributes: []
+                  ppat_attributes: [],
                 },
                 pcstr_fields: [
                   {
@@ -75,225 +116,217 @@
                             Pcl_constr(
                               {
                                 txt:
-                                  [@implicit_arity]
-                                  Ldot([@implicit_arity] Ldot(Lident("MyClass1"), "Mod1"), "t"),
+                                  [@implicit_arity] Ldot(Lident("Any"), "t"),
                                 loc: {
                                   loc_start: {
                                     pos_fname: "draft/draft_ml.ml",
                                     pos_lnum: 3,
-                                    pos_bol: 35,
-                                    pos_cnum: 48
+                                    pos_bol: 39,
+                                    pos_cnum: 52,
                                   },
                                   loc_end: {
                                     pos_fname: "draft/draft_ml.ml",
                                     pos_lnum: 3,
-                                    pos_bol: 35,
-                                    pos_cnum: 63
+                                    pos_bol: 39,
+                                    pos_cnum: 57,
                                   },
-                                  loc_ghost: false
-                                }
+                                  loc_ghost: false,
+                                },
                               },
-                              []
+                              [],
                             ),
                           pcl_loc: {
                             loc_start: {
                               pos_fname: "draft/draft_ml.ml",
                               pos_lnum: 3,
-                              pos_bol: 35,
-                              pos_cnum: 48
+                              pos_bol: 39,
+                              pos_cnum: 52,
                             },
                             loc_end: {
                               pos_fname: "draft/draft_ml.ml",
                               pos_lnum: 3,
-                              pos_bol: 35,
-                              pos_cnum: 63
+                              pos_bol: 39,
+                              pos_cnum: 57,
                             },
-                            loc_ghost: false
+                            loc_ghost: false,
                           },
-                          pcl_attributes: []
+                          pcl_attributes: [],
                         },
-                        Some("super1")
+                        Some("super"),
                       ),
                     pcf_loc: {
                       loc_start: {
                         pos_fname: "draft/draft_ml.ml",
                         pos_lnum: 3,
-                        pos_bol: 35,
-                        pos_cnum: 39
+                        pos_bol: 39,
+                        pos_cnum: 43,
                       },
                       loc_end: {
                         pos_fname: "draft/draft_ml.ml",
                         pos_lnum: 3,
-                        pos_bol: 35,
-                        pos_cnum: 73
+                        pos_bol: 39,
+                        pos_cnum: 66,
                       },
-                      loc_ghost: false
+                      loc_ghost: false,
                     },
-                    pcf_attributes: []
+                    pcf_attributes: [],
                   },
                   {
                     pcf_desc:
                       [@implicit_arity]
                       Pcf_method(
                         {
-                          txt: "name",
+                          txt: "classInheritance",
                           loc: {
                             loc_start: {
                               pos_fname: "draft/draft_ml.ml",
                               pos_lnum: 4,
-                              pos_bol: 74,
-                              pos_cnum: 85
+                              pos_bol: 67,
+                              pos_cnum: 79,
                             },
                             loc_end: {
                               pos_fname: "draft/draft_ml.ml",
                               pos_lnum: 4,
-                              pos_bol: 74,
-                              pos_cnum: 89
+                              pos_bol: 67,
+                              pos_cnum: 95,
                             },
-                            loc_ghost: false
-                          }
+                            loc_ghost: false,
+                          },
                         },
                         Public,
                         [@implicit_arity]
                         Cfk_concrete(
-                          Fresh,
+                          Override,
                           {
                             pexp_desc:
                               [@implicit_arity]
                               Pexp_poly(
                                 {
                                   pexp_desc:
-                                    Pexp_constant(
-                                      [@implicit_arity] Const_string("<<<<<wilton>>>>", None)
-                                    ),
+                                    Pexp_ident({
+                                      txt: Lident("classInheritance"),
+                                      loc: {
+                                        loc_start: {
+                                          pos_fname: "draft/draft_ml.ml",
+                                          pos_lnum: 4,
+                                          pos_bol: 67,
+                                          pos_cnum: 98,
+                                        },
+                                        loc_end: {
+                                          pos_fname: "draft/draft_ml.ml",
+                                          pos_lnum: 4,
+                                          pos_bol: 67,
+                                          pos_cnum: 114,
+                                        },
+                                        loc_ghost: false,
+                                      },
+                                    }),
                                   pexp_loc: {
                                     loc_start: {
                                       pos_fname: "draft/draft_ml.ml",
                                       pos_lnum: 4,
-                                      pos_bol: 74,
-                                      pos_cnum: 92
+                                      pos_bol: 67,
+                                      pos_cnum: 98,
                                     },
                                     loc_end: {
                                       pos_fname: "draft/draft_ml.ml",
                                       pos_lnum: 4,
-                                      pos_bol: 74,
-                                      pos_cnum: 109
+                                      pos_bol: 67,
+                                      pos_cnum: 114,
                                     },
-                                    loc_ghost: false
+                                    loc_ghost: false,
                                   },
-                                  pexp_attributes: []
+                                  pexp_attributes: [],
                                 },
-                                None
+                                None,
                               ),
                             pexp_loc: {
                               loc_start: {
                                 pos_fname: "draft/draft_ml.ml",
                                 pos_lnum: 4,
-                                pos_bol: 74,
-                                pos_cnum: 85
+                                pos_bol: 67,
+                                pos_cnum: 77,
                               },
                               loc_end: {
                                 pos_fname: "draft/draft_ml.ml",
                                 pos_lnum: 4,
-                                pos_bol: 74,
-                                pos_cnum: 109
+                                pos_bol: 67,
+                                pos_cnum: 114,
                               },
-                              loc_ghost: true
+                              loc_ghost: true,
                             },
-                            pexp_attributes: []
-                          }
-                        )
+                            pexp_attributes: [],
+                          },
+                        ),
                       ),
                     pcf_loc: {
                       loc_start: {
                         pos_fname: "draft/draft_ml.ml",
                         pos_lnum: 4,
-                        pos_bol: 74,
-                        pos_cnum: 78
+                        pos_bol: 67,
+                        pos_cnum: 71,
                       },
                       loc_end: {
                         pos_fname: "draft/draft_ml.ml",
                         pos_lnum: 4,
-                        pos_bol: 74,
-                        pos_cnum: 109
+                        pos_bol: 67,
+                        pos_cnum: 114,
                       },
-                      loc_ghost: false
+                      loc_ghost: false,
                     },
-                    pcf_attributes: []
-                  }
-                ]
+                    pcf_attributes: [],
+                  },
+                ],
               }),
             pcl_loc: {
               loc_start: {
                 pos_fname: "draft/draft_ml.ml",
                 pos_lnum: 2,
-                pos_bol: 19,
-                pos_cnum: 21
+                pos_bol: 15,
+                pos_cnum: 17,
               },
               loc_end: {
                 pos_fname: "draft/draft_ml.ml",
                 pos_lnum: 5,
-                pos_bol: 110,
-                pos_cnum: 115
+                pos_bol: 115,
+                pos_cnum: 120,
               },
-              loc_ghost: false
+              loc_ghost: false,
             },
-            pcl_attributes: []
+            pcl_attributes: [],
           },
           pci_loc: {
             loc_start: {
               pos_fname: "draft/draft_ml.ml",
               pos_lnum: 1,
               pos_bol: 0,
-              pos_cnum: 0
+              pos_cnum: 0,
             },
             loc_end: {
               pos_fname: "draft/draft_ml.ml",
               pos_lnum: 5,
-              pos_bol: 110,
-              pos_cnum: 130
+              pos_bol: 115,
+              pos_cnum: 120,
             },
-            loc_ghost: false
+            loc_ghost: false,
           },
-          pci_attributes: [
-            (
-              {
-                txt: "lang.class",
-                loc: {
-                  loc_start: {
-                    pos_fname: "draft/draft_ml.ml",
-                    pos_lnum: 5,
-                    pos_bol: 110,
-                    pos_cnum: 118
-                  },
-                  loc_end: {
-                    pos_fname: "draft/draft_ml.ml",
-                    pos_lnum: 5,
-                    pos_bol: 110,
-                    pos_cnum: 128
-                  },
-                  loc_ghost: false
-                }
-              },
-              PStr([])
-            )
-          ]
-        }
+          pci_attributes: [],
+        },
       ]),
     pstr_loc: {
       loc_start: {
         pos_fname: "draft/draft_ml.ml",
         pos_lnum: 1,
         pos_bol: 0,
-        pos_cnum: 0
+        pos_cnum: 0,
       },
       loc_end: {
         pos_fname: "draft/draft_ml.ml",
         pos_lnum: 5,
-        pos_bol: 110,
-        pos_cnum: 130
+        pos_bol: 115,
+        pos_cnum: 120,
       },
-      loc_ghost: false
-    }
-  }
+      loc_ghost: false,
+    },
+  },
 ];
