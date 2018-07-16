@@ -258,15 +258,17 @@ let langMapper = argv => {
           | [head, ...tail] => procInheritance(tail, acc)
           };
 
+        /*//TODO more patterns*/
         let inheritances =
           switch (classExpr) {
           | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} =>
             fieldsRef := list;
             selfRef := Some(self);
             procInheritance(list, []);
-          |{pcl_desc:(Pcl_constr (_, _)|Pcl_fun (_, _, _, _)|Pcl_apply (_, _)|
-            Pcl_let (_, _, _)|Pcl_constraint (_, _)|Pcl_extension _)} =>
-           
+          | {pcl_desc: Pcl_fun(_, _, _, {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})})} =>
+            fieldsRef := list;
+            selfRef := Some(self);
+            procInheritance(list, []);
           };
 
         let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
