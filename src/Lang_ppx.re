@@ -40,7 +40,7 @@ let getExpr = (payload, loc) =>
   Parsetree.(
     switch (payload) {
     | PStr([{pstr_desc: Pstr_eval(expr, _)}]) => expr
-    | _ => fail(loc, "getExpr: must contain an expression")
+    | _ => fail(~loc, "getExpr: must contain an expression")
     }
   );
 
@@ -90,12 +90,16 @@ let mkModuleStri = (name, loc, structure) => {
     }),
 };
 
+let mkClassStructureDesc = (self, fields) => Pcl_structure({pcstr_self: self, pcstr_fields: fields});
+
+let mkClassFunDesc = (self, fields) => Pcl_structure({pcstr_self: self, pcstr_fields: fields});
+
 let mkClassStri = (virt, params, name, loc, self, fields) => {
   pstr_desc:
     Pstr_class([
       {
         pci_virt: virt,
-        pci_params: [],
+        pci_params: params,
         pci_name: {
           txt: name,
           loc,
@@ -250,8 +254,6 @@ let langMapper = argv => {
         );
 
         print_endline("class_declaration: " ++ name);
-        let fieldsRef = ref([]);
-        let selfRef = ref(None);
 
         let rec procInheritance = (list, acc) =>
           switch (list) {
@@ -264,19 +266,19 @@ let langMapper = argv => {
           | [head, ...tail] => procInheritance(tail, acc)
           };
 
-        let inheritances =
-          switch (classExpr) {
-          | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} =>
-            fieldsRef := list;
-            selfRef := Some(self);
-            procInheritance(list, []);
-          | {pcl_desc: Pcl_fun(_, _, _, {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})})} =>
-            fieldsRef := list;
-            selfRef := Some(self);
-            procInheritance(list, []);
-          | _ => patternFail(~loc=nameLoc, "inheritances")
+        let rec procConstruction = (expr, acc) =>
+          switch (expr) {
+          | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} => (
+              procInheritance(list, []),
+              List.rev(acc),
+              self,
+              list,
+            )
+          | {pcl_desc: Pcl_fun(p0, p1, p2, expr)} => procConstruction(expr, [(p0, p1, p2), ...acc])
+          | _ => patternFail(~loc=nameLoc, "procConstruction")
           };
 
+        let (inheritances, construction, selfPattern, classFields) = procConstruction(classExpr, []);
         let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
 
         let (inheritances, implicitInheritanceFields) =
@@ -319,8 +321,8 @@ let langMapper = argv => {
             params,
             "t",
             nameLoc,
-            getSome(selfRef^),
-            implicitInheritanceFields @ fieldsRef^ @ inheritanceClassFields,
+            selfPattern,
+            implicitInheritanceFields @ classFields @ inheritanceClassFields,
           ),
         ];
 

@@ -35,9 +35,7 @@ module Lang = {
 };
 
 [@lang.class]
-class _Person ('a) (name:string) = {
-  as (this: 'this);
-  inherit class Lang.Any.t as super;
+class _Person ('a) (name: string, surName: string) = {
   pub personName = name;
 };
 
