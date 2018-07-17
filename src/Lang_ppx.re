@@ -5,6 +5,8 @@ open Ast_helper;
 open Asttypes;
 open Longident;
 
+let uuid = () => Uuid.to_string(Uuid.v(`V4));
+
 let getSome = opt =>
   switch (opt) {
   | Some(x) => x
@@ -415,26 +417,26 @@ let langMapper = argv => {
           classInheritance
           |> List.map(it => {
                let classTypePath = (it |> List.rev |> List.tl |> List.rev) @ ["ClassType"];
-               let inheritanceIdent = buildIdentExpr(classTypePath @ ["inheritance"], nameLoc);
+               let inheritanceIdent = buildIdentExpr(classTypePath @ ["classInheritance"], nameLoc);
 
                %str
-               Hashtbl.iter((k, v) => Hashtbl.add(ClassType.inheritance, k, v), [%e inheritanceIdent]);
+               Hashtbl.iter((k, v) => Hashtbl.add(ClassType.classInheritance, k, v), [%e inheritanceIdent]);
              })
           |> List.flatten;
 
         let inheritanceClassFields = [
-          mkMethodOverrideSimpleStri("classInheritance", listToIdent(["inheritance"]), nameLoc),
-          mkMethodOverrideSimpleStri("classId", listToIdent(["id"]), nameLoc),
-          mkMethodOverrideSimpleStri("className", listToIdent(["name"]), nameLoc),
+          mkMethodOverrideSimpleStri("classInheritance", listToIdent(["classInheritance"]), nameLoc),
+          mkMethodOverrideSimpleStri("classId", listToIdent(["classId"]), nameLoc),
+          mkMethodOverrideSimpleStri("className", listToIdent(["className"]), nameLoc),
         ];
 
         let beginPart =
           [@metaloc nameLoc]
           [%str
-            let id = __LOC__;
-            let name = [%e stringToExpr(name)];
-            let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
-            Hashtbl.add(inheritance, id, name)
+            let classId = __LOC__ ++ [%e stringToExpr(" | " ++ uuid())];
+            let className = [%e stringToExpr(name)];
+            let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
+            Hashtbl.add(classInheritance, classId, className)
           ];
 
         let classDeclItem = [
