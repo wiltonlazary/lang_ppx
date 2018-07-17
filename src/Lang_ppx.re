@@ -321,7 +321,7 @@ let langMapper = argv => {
           );
 
         default_mapper.expr(mapper, expr);
-      | other => patternFail(~exprLoc, "@lang.class check any#is")
+      | other => patternFail(~exprLoc, "@lang.class check any#cast")
       }
     | other => default_mapper.expr(mapper, other)
     },
