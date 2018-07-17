@@ -35,7 +35,7 @@ module Lang = {
 };
 
 [@lang.class]
-class _Person ('a) (name: string, surName: string) = {
+class _Person = {
   pub personName = name;
 };
 

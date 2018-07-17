@@ -90,30 +90,46 @@ let mkModuleStri = (name, loc, structure) => {
     }),
 };
 
-let mkClassStructureDesc = (self, fields) => Pcl_structure({pcstr_self: self, pcstr_fields: fields});
-
-let mkClassFunDesc = (self, fields) => Pcl_structure({pcstr_self: self, pcstr_fields: fields});
-
 let mkClassStri = (virt, params, name, loc, construction, self, fields) => {
-  pstr_desc:
-    Pstr_class([
-      {
-        pci_virt: virt,
-        pci_params: params,
-        pci_name: {
-          txt: name,
-          loc,
+  let pclDesc =
+    if (List.length(construction) == 0) {
+      Pcl_structure({pcstr_self: self, pcstr_fields: fields});
+    } else {
+      let rec construct = (rest, expr) =>
+        switch (rest) {
+        | [] => expr
+        | [head] =>
+          let (p0, p1, p2) = head;
+          Pcl_fun(p0, p1, p2, {pcl_desc: expr, pcl_loc: loc, pcl_attributes: []});
+        | [head, ...tail] =>
+          let (p0, p1, p2) = head;
+          construct(tail, Pcl_fun(p0, p1, p2, {pcl_desc: expr, pcl_loc: loc, pcl_attributes: []}));
+        };
+
+      construct(construction, Pcl_structure({pcstr_self: self, pcstr_fields: fields}));
+    };
+
+  {
+    pstr_desc:
+      Pstr_class([
+        {
+          pci_virt: virt,
+          pci_params: params,
+          pci_name: {
+            txt: name,
+            loc,
+          },
+          pci_expr: {
+            pcl_desc: pclDesc,
+            pcl_loc: loc,
+            pcl_attributes: [],
+          },
+          pci_loc: loc,
+          pci_attributes: [],
         },
-        pci_expr: {
-          pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: fields}),
-          pcl_loc: loc,
-          pcl_attributes: [],
-        },
-        pci_loc: loc,
-        pci_attributes: [],
-      },
-    ]),
-  pstr_loc: loc,
+      ]),
+    pstr_loc: loc,
+  };
 };
 
 let mkMethodOverrideSimpleStri = (name, lident, loc) => {
@@ -269,7 +285,7 @@ let langMapper = argv => {
         let rec procStructure = (expr, acc) =>
           switch (expr) {
           | {pcl_desc: Pcl_structure({pcstr_self: self, pcstr_fields: list})} => (
-              List.rev(acc),
+              acc,
               self,
               list,
               procInheritance(list, []),
