@@ -14,19 +14,23 @@ module Lang = {
         pub classInheritance = inheritance;
         pub classId = id;
         pub className = name;
-        pub is = (classType: (module AnyClassType)) => {
-          module ClassType = (val (classType: (module AnyClassType)));
+        pub is =
+          [@lang.safeis]
+          (
+            (classType: (module AnyClassType)) => {
+              module ClassType = (val (classType: (module AnyClassType)));
 
-          try (
-            {
-              this#classInheritance |. Hashtbl.find(ClassType.id) |. ignore;
-              true;
+              try (
+                {
+                  this#classInheritance |. Hashtbl.find(ClassType.id) |. ignore;
+                  true;
+                }
+              ) {
+              | _ => false
+              };
             }
-          ) {
-          | _ => false
-          };
-        };
-        pub cast = [@lang.safecast]() => ();
+          );
+        pub cast = [@lang.safecast] (() => ());
       };
     };
 
