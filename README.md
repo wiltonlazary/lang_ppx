@@ -1,3 +1,5 @@
 #lang_ppx
 
-PPX that implements ocaml safe class downcast and other goodies.
+Ocaml/ReasonML class downcast and lang goodies.
+
+To attract imperative people that is accustomed to class flexibilities.
