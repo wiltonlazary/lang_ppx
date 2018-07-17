@@ -340,7 +340,13 @@ let langMapper = argv => {
             %e
             letExpr;
           } else {
-            raise(Failure("cast failed!"));
+            raise(
+              Failure(
+                [%e stringToExpr("@lang.class cast failed: " ++ String.concat(".", classTypeIdentPath))]
+                ++ " | "
+                ++ __LOC__,
+              ),
+            );
           }
         );
       | other => patternFail(~loc=exprLoc, "@lang.class check any#cast")
