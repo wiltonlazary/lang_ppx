@@ -362,12 +362,12 @@ let langMapper = argv => {
       | {
           pci_virt: virt,
           pci_params: params,
-          pci_name: {txt: className, loc: nameLoc},
+          pci_name: {txt: classNameStr, loc: nameLoc},
           pci_expr: classExpr,
           pci_attributes: [({txt: "lang.class"}, payload)],
         } as _classDeclaration =>
         String.(
-          if (className |> length < 2 || className.[0] != '_' || className.[1] != (className.[1] |> Char.uppercase)) {
+          if (classNameStr |> length < 2 || classNameStr.[0] != '_' || classNameStr.[1] != (classNameStr.[1] |> Char.uppercase)) {
             raise(
               fail(
                 ~loc=nameLoc,
@@ -377,8 +377,8 @@ let langMapper = argv => {
           }
         );
 
-        let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
-        print_endline("class_declaration: " ++ className);
+        let classNameStr = classNameStr.[0] == '_' ? String.sub(classNameStr, 1, String.length(classNameStr) - 1) : classNameStr;
+        print_endline("class_declaration: " ++ classNameStr);
 
         let rec procInheritance = (list, acc) =>
           switch (list) {
@@ -446,8 +446,8 @@ let langMapper = argv => {
         let beginPart =
           [@metaloc nameLoc]
           [%str
-            let classId = __LOC__ ++ [%e stringToExpr(" | " ++ uuid())];
-            let className = [%e stringToExpr(className)];
+            let classId =  [%e stringToExpr(classNameStr ++ " | " ++ uuid() ++ " | ")] ++ __LOC__ ;
+            let className = [%e stringToExpr(classNameStr)];
             let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
             Hashtbl.add(classInheritance, classId, className)
           ];
@@ -476,7 +476,7 @@ let langMapper = argv => {
           ];
 
         let structure_item =
-          mkModuleStri(String.capitalize(className), nameLoc, List.concat([classTypePart, endPart]));
+          mkModuleStri(String.capitalize(classNameStr), nameLoc, List.concat([classTypePart, endPart]));
         default_mapper.structure_item(mapper, structure_item);
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
