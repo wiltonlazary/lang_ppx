@@ -46,7 +46,7 @@ module Any = {
                 true;
               }
             ) {
-            | _ => raise(Failure("@lang.class cast failure:\n" ++ classId ++ "\n => \n" ++ ClassType.classId))
+            | _ => raise(Failure("@lang.class cast failure:\n" ++ this#classId ++ "\n => \n" ++ ClassType.classId))
             };
           }
         );
