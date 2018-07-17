@@ -376,7 +376,7 @@ let langMapper = argv => {
             );
           }
         );
-        
+
         let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
         print_endline("class_declaration: " ++ className);
 
@@ -384,6 +384,17 @@ let langMapper = argv => {
           switch (list) {
           | [] => acc
           | [{pcf_desc: Pcf_inherit(_, {pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, ...tail] =>
+            let identPaths = identToList(identPath, []);
+            let inheritClass = String.concat(".", identPaths);
+            print_endline("inherit: " ++ inheritClass);
+            procInheritance(tail, [identPaths, ...acc]);
+          | [
+              {
+                pcf_desc:
+                  Pcf_inherit(_, {pcl_desc: Pcl_apply({pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, _),
+              },
+              ...tail,
+            ] =>
             let identPaths = identToList(identPath, []);
             let inheritClass = String.concat(".", identPaths);
             print_endline("inherit: " ++ inheritClass);
@@ -400,11 +411,10 @@ let langMapper = argv => {
               procInheritance(list, []),
             )
           | {pcl_desc: Pcl_fun(p0, p1, p2, expr)} => procStructure(expr, [(p0, p1, p2), ...acc])
-          | _ => patternFail(~loc=nameLoc, "procConstruction")
+          | _ => patternFail(~loc=nameLoc, "procStructure")
           };
 
         let (classConstruction, classSelf, classFields, classInheritance) = procStructure(classExpr, []);
-       
 
         let (classInheritance, implicitInheritanceFields) =
           if (classInheritance |> List.length == 0) {
@@ -462,7 +472,8 @@ let langMapper = argv => {
             class t = class ClassType.t
           ];
 
-        let structure_item = mkModuleStri(String.capitalize(className), nameLoc, List.concat([classTypePart, endPart]));
+        let structure_item =
+          mkModuleStri(String.capitalize(className), nameLoc, List.concat([classTypePart, endPart]));
         default_mapper.structure_item(mapper, structure_item);
       | _ => default_mapper.structure_item(mapper, structure_item)
       }

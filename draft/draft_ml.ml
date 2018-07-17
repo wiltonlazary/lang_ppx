@@ -1,1 +1,3 @@
-let xxx : lagarto = person#cast Lang.Any.t
+class _TestClass =
+  object (this : 'this) inherit  (Person.t "wilton" "lazary") as super end
+[@@lang.class ]
