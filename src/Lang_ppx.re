@@ -263,7 +263,7 @@ let langMapper = argv => {
           pexp_desc: Pexp_ident({txt: classTypeIdent, loc: identLoc}),
           pexp_loc: identExprLoc,
           pexp_attributes: identExprAttributes,
-        } =>
+        } as _classTypeIdentExpr =>
         let classTypeIdentPath = identToList(classTypeIdent, []);
         let moduleTypeIdent = listToIdent((classTypeIdentPath |> List.rev |> List.tl |> List.rev) @ ["classType"]);
 
@@ -300,7 +300,7 @@ let langMapper = argv => {
           pexp_desc: Pexp_ident({txt: classTypeIdent, loc: identLoc}),
           pexp_loc: identExprLoc,
           pexp_attributes: identExprAttributes,
-        } =>
+        } as classTypeIdentExpr =>
         let classTypeIdentPath = identToList(classTypeIdent, []);
         let moduleTypeIdent = listToIdent((classTypeIdentPath |> List.rev |> List.tl |> List.rev) @ ["classType"]);
 
@@ -310,18 +310,40 @@ let langMapper = argv => {
           pexp_attributes: identExprAttributes,
         };
 
-        let expr =
+        let isExpr =
           Exp.mk(
             ~loc=exprLoc,
             ~attrs=expAttributes,
             Pexp_apply(
               {pexp_desc: Pexp_send(p0, "is"), pexp_loc: applyLoc, pexp_attributes: applyAttributes},
-              [("", identExpr), ...List.tl(expressions)],
+              [("", identExpr)],
             ),
           );
 
-        default_mapper.expr(mapper, expr);
-      | other => patternFail(~exprLoc, "@lang.class check any#cast")
+        let letExpr =
+          mkLetExpr(
+            Nonrecursive,
+            "it",
+            exprLoc,
+            [%expr Lang.identity([%e p0])],
+            Some({
+              ptyp_desc: Ptyp_constr({txt: classTypeIdent, loc: identLoc}, []),
+              ptyp_loc: identLoc,
+              ptyp_attributes: [],
+            }),
+            [%expr it],
+          );
+
+        [@metaloc exprLoc]
+        (
+          if%expr ([%e isExpr]) {
+            %e
+            letExpr;
+          } else {
+            raise(Failure("cast failed!"));
+          }
+        );
+      | other => patternFail(~loc=exprLoc, "@lang.class check any#cast")
       }
     | other => default_mapper.expr(mapper, other)
     },

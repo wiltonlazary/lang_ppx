@@ -58,7 +58,7 @@ class _TestClass = {
 
 let person = (new Person.t)("wilton", "lazary");
 let testClass = new TestClass.t;
-let person2: Lang.Any.t = Lang.identity(testClass);
+let person2 = testClass#cast(Lang.Any.t);
 
 let () = {
   print_endline((Lang.identity(person2): TestClass.t)#personName2);

@@ -1,1 +1,1 @@
-let _ = person#cast Lang.Any.t
+let xxx : lagarto = person#cast Lang.Any.t
