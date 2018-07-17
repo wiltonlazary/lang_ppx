@@ -1,10 +1,10 @@
 module Lang = {
-  external cast : 'a => 'b = "%identity";
+  external identity : 'a => 'b = "%identity";
   module type AnyClassType = {let id: string; let name: string; let inheritance: Hashtbl.t(string, string);};
 
   module Any = {
     module ClassType = {
-      let id = __LOC__;
+      let id = __LOC__ ++ " | 7a2d25ba-4e76-4144-b28e-7a41f3661d90";
       let name = "Any";
       let inheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
       Hashtbl.add(inheritance, id, name);
@@ -26,6 +26,7 @@ module Lang = {
           | _ => false
           };
         };
+        pub cast = [@lang.safecast]() => ();
       };
     };
 
@@ -49,7 +50,7 @@ class _TestClass = {
 
 let person = (new Person.t)("wilton", "lazary");
 let testClass = new TestClass.t;
-let person2: Lang.Any.t = Lang.cast(testClass);
+let person2: Lang.Any.t = Lang.identity(testClass);
 
-print_endline((Lang.cast(person2): TestClass.t)#personName2);
+print_endline((Lang.identity(person2): TestClass.t)#personName2);
 print_endline(person#is(Lang.Any.classType) |> string_of_bool);
