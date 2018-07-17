@@ -50,11 +50,17 @@ class _TestClass = {
   as (this: 'this);
   inherit (class Person.t)("wilton", "lazary") as super;
   pub personName2 = "<<<<<wilton>>>>";
+  pub test = (a: Lang.Any.t) => {
+    ();
+    print_endline(a#is(Lang.Any.classType) |> string_of_bool);
+  };
 };
 
 let person = (new Person.t)("wilton", "lazary");
 let testClass = new TestClass.t;
 let person2: Lang.Any.t = Lang.identity(testClass);
 
-print_endline((Lang.identity(person2): TestClass.t)#personName2);
-print_endline(person#is(Lang.Any.classType) |> string_of_bool);
+let () = {
+  print_endline((Lang.identity(person2): TestClass.t)#personName2);
+  testClass#test(person :> Lang.Any.t);
+};

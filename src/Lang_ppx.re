@@ -247,6 +247,13 @@ let rec identPathToList = (identPath, acc) =>
 
 let langMapper = argv => {
   ...default_mapper,
+  expr: (mapper, expr) =>
+    switch (expr) {
+    | {pexp_desc: Pexp_apply({pexp_desc: Pexp_send(_, "is")}, expressions)} as expr =>
+      print_endline("-------------------Detected-------------------------");
+      default_mapper.expr(mapper, expr);
+    | other => default_mapper.expr(mapper, other)
+    },
   structure_item: (mapper, structure_item) =>
     switch (structure_item) {
     | {pstr_desc: Pstr_class(list)} =>
@@ -352,7 +359,9 @@ let langMapper = argv => {
             class t = class ClassType.t
           ];
 
-        mkModuleStri(String.capitalize(name), nameLoc, List.concat([classTypePart, inheritanceAdd, endPart]));
+        let structure_item =
+          mkModuleStri(String.capitalize(name), nameLoc, List.concat([classTypePart, inheritanceAdd, endPart]));
+        default_mapper.structure_item(mapper, structure_item);
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
     | _ => default_mapper.structure_item(mapper, structure_item)
