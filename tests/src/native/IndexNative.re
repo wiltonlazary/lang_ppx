@@ -17,7 +17,7 @@ class _TestClass = {
 
 let person = (new Person.t)("wilton", "lazary");
 let testClass = new TestClass.t;
-let person2 = person#cast(TestClass.t);
+let person2 = testClass#cast(Person.t);
 
 let () = {
   print_endline((Lang.identity(person2): TestClass.t)#personName2);

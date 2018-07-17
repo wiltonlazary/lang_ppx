@@ -362,12 +362,12 @@ let langMapper = argv => {
       | {
           pci_virt: virt,
           pci_params: params,
-          pci_name: {txt: name, loc: nameLoc},
+          pci_name: {txt: className, loc: nameLoc},
           pci_expr: classExpr,
           pci_attributes: [({txt: "lang.class"}, payload)],
         } as _classDeclaration =>
         String.(
-          if (name |> length < 2 || name.[0] != '_' || name.[1] != (name.[1] |> Char.uppercase)) {
+          if (className |> length < 2 || className.[0] != '_' || className.[1] != (className.[1] |> Char.uppercase)) {
             raise(
               fail(
                 ~loc=nameLoc,
@@ -376,8 +376,9 @@ let langMapper = argv => {
             );
           }
         );
-
-        print_endline("class_declaration: " ++ name);
+        
+        let className = className.[0] == '_' ? String.sub(className, 1, String.length(className) - 1) : className;
+        print_endline("class_declaration: " ++ className);
 
         let rec procInheritance = (list, acc) =>
           switch (list) {
@@ -403,12 +404,11 @@ let langMapper = argv => {
           };
 
         let (classConstruction, classSelf, classFields, classInheritance) = procStructure(classExpr, []);
-        let name = name.[0] == '_' ? String.sub(name, 1, String.length(name) - 1) : name;
+       
 
         let (classInheritance, implicitInheritanceFields) =
           if (classInheritance |> List.length == 0) {
-            let res = [mkInheritLangAny(nameLoc)];
-            ([["Lang", "Any", "t"]], res);
+            ([["Lang", "Any", "t"]], [mkInheritLangAny(nameLoc)]);
           } else {
             (classInheritance, []);
           };
@@ -420,7 +420,7 @@ let langMapper = argv => {
                let inheritanceIdent = buildIdentExpr(classTypePath @ ["classInheritance"], nameLoc);
 
                %str
-               Hashtbl.iter((k, v) => Hashtbl.add(ClassType.classInheritance, k, v), [%e inheritanceIdent]);
+               Hashtbl.iter((k, v) => Hashtbl.add(classInheritance, k, v), [%e inheritanceIdent]);
              })
           |> List.flatten;
 
@@ -434,7 +434,7 @@ let langMapper = argv => {
           [@metaloc nameLoc]
           [%str
             let classId = __LOC__ ++ [%e stringToExpr(" | " ++ uuid())];
-            let className = [%e stringToExpr(name)];
+            let className = [%e stringToExpr(className)];
             let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
             Hashtbl.add(classInheritance, classId, className)
           ];
@@ -451,7 +451,9 @@ let langMapper = argv => {
           ),
         ];
 
-        let classTypePart = [mkModuleStri("ClassType", nameLoc, List.concat([beginPart, classDeclItem]))];
+        let classTypePart = [
+          mkModuleStri("ClassType", nameLoc, List.concat([beginPart, inheritanceAdd, classDeclItem])),
+        ];
 
         let endPart =
           [@metaloc nameLoc]
@@ -460,8 +462,7 @@ let langMapper = argv => {
             class t = class ClassType.t
           ];
 
-        let structure_item =
-          mkModuleStri(String.capitalize(name), nameLoc, List.concat([classTypePart, inheritanceAdd, endPart]));
+        let structure_item = mkModuleStri(String.capitalize(className), nameLoc, List.concat([classTypePart, endPart]));
         default_mapper.structure_item(mapper, structure_item);
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
