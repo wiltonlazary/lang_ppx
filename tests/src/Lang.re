@@ -8,7 +8,7 @@ module type AnyClassType = {
 
 module Any = {
   module ClassType = {
-    let classId = __LOC__ ++ " | 7a2d25ba-4e76-4144-b28e-7a41f3661d90";
+    let classId = "Any | 7a2d25ba-4e76-4144-b28e-7a41f3661d90 | " ++ __LOC__;
     let className = "Any";
     let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
     Hashtbl.add(classInheritance, classId, className);
@@ -31,6 +31,22 @@ module Any = {
               }
             ) {
             | _ => false
+            };
+          }
+        );
+      pub check =
+        [@lang.safeis]
+        (
+          (classType: (module AnyClassType)) => {
+            module ClassType = (val (classType: (module AnyClassType)));
+
+            try (
+              {
+                this#classInheritance |. Hashtbl.find(ClassType.classId) |. ignore;
+                true;
+              }
+            ) {
+            | _ => raise(Failure("@lang.class cast failure:\n" ++ classId ++ "\n => \n" ++ ClassType.classId))
             };
           }
         );

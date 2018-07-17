@@ -312,12 +312,12 @@ let langMapper = argv => {
           pexp_attributes: identExprAttributes,
         };
 
-        let isExpr =
+        let checkExpr =
           Exp.mk(
             ~loc=exprLoc,
             ~attrs=expAttributes,
             Pexp_apply(
-              {pexp_desc: Pexp_send(p0, "is"), pexp_loc: applyLoc, pexp_attributes: applyAttributes},
+              {pexp_desc: Pexp_send(p0, "check"), pexp_loc: applyLoc, pexp_attributes: applyAttributes},
               [("", identExpr)],
             ),
           );
@@ -338,7 +338,7 @@ let langMapper = argv => {
 
         [@metaloc exprLoc]
         (
-          if%expr ([%e isExpr]) {
+          if%expr ([%e checkExpr]) {
             %e
             letExpr;
           } else {
