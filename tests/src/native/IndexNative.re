@@ -35,20 +35,21 @@ module Lang = {
 };
 
 [@lang.class]
-class _Person = {
+class _Person (name: string, surName: string) = {
+  inherit class Lang.Any.t as super;
   pub personName = name;
 };
 
 [@lang.class]
 class _TestClass = {
   as (this: 'this);
-  inherit class Person.t as super;
+  inherit (class Person.t)("wilton", "lazary") as super;
   pub personName2 = "<<<<<wilton>>>>";
 };
 
-let person = (new Person.t :> Lang.Any.t);
+let person = (new Person.t)("wilton", "lazary");
 let testClass = new TestClass.t;
-let person: TestClass.t = Lang.cast(testClass);
+let person2: Lang.Any.t = Lang.cast(testClass);
 
-print_endline(person#personName2);
-print_endline(person#is(Person.classType) |> string_of_bool);
+print_endline((Lang.cast(person2): TestClass.t)#personName2);
+print_endline(person#is(Lang.Any.classType) |> string_of_bool);
