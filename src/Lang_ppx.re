@@ -388,6 +388,7 @@ let langMapper = argv => {
             let inheritClass = String.concat(".", identPaths);
             print_endline("inherit: " ++ inheritClass);
             procInheritance(tail, [identPaths, ...acc]);
+
           | [
               {
                 pcf_desc:
