@@ -52,7 +52,7 @@ class _TestClass = {
   pub personName2 = "<<<<<wilton>>>>";
   pub test = (a: Lang.Any.t) => {
     ();
-    print_endline(a#is(Lang.Any.classType) |> string_of_bool);
+    print_endline(a#is(Lang.Any.t) |> string_of_bool);
   };
 };
 

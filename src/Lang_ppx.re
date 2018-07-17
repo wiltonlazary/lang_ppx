@@ -58,20 +58,6 @@ let continuationExpr = expr => Exp.attr(expr, ({txt: "langcontinuation", loc: de
 let matchesCpsApply = id =>
   id == "await" || id == "delay" || id |> endsWith("Cps") || id |> endsWith("Await") || id |> endsWith("Delay");
 
-let buildLongident = list => {
-  let rec buildLdot = (list, sum) =>
-    switch (list) {
-    | [] => sum
-    | [head] => Ldot(sum, head)
-    | [head, ...tail] => buildLdot(tail, Ldot(sum, head))
-    };
-
-  let ident = Lident(List.hd(list));
-  buildLdot(List.tl(list), ident);
-};
-
-let buildIdentExpr = (list, loc) => Exp.ident({txt: buildLongident(list), loc});
-
 let mkModuleStri = (name, loc, structure) => {
   pstr_loc: loc,
   pstr_desc:
@@ -238,20 +224,105 @@ let mkLetIdentExpr = (recFlag, varName, varNameLoc, identName, constraintType, i
 
 let mkTryExpr = (expr, caseExprs) => Exp.try_(expr, caseExprs);
 
-let rec identPathToList = (identPath, acc) =>
+let listToIdent = list => {
+  let rec buildLdot = (list, sum) =>
+    switch (list) {
+    | [] => sum
+    | [head] => Ldot(sum, head)
+    | [head, ...tail] => buildLdot(tail, Ldot(sum, head))
+    };
+
+  let ident = Lident(List.hd(list));
+  buildLdot(List.tl(list), ident);
+};
+
+let buildIdentExpr = (list, loc) => Exp.ident({txt: listToIdent(list), loc});
+
+let rec identToList = (identPath, acc) =>
   switch (identPath) {
   | Lident(txt) => [txt, ...acc]
-  | Ldot(path, txt) => identPathToList(path, [txt, ...acc])
-  | _ => raise(Failure("identPathToList: Pattern not implemented yet!"))
+  | Ldot(path, txt) => identToList(path, [txt, ...acc])
+  | _ => raise(Failure("identToList: Pattern not implemented yet!"))
   };
 
 let langMapper = argv => {
   ...default_mapper,
   expr: (mapper, expr) =>
     switch (expr) {
-    | {pexp_desc: Pexp_apply({pexp_desc: Pexp_send(_, "is")}, expressions)} as expr =>
-      print_endline("-------------------Detected-------------------------");
-      default_mapper.expr(mapper, expr);
+    | {
+        pexp_desc:
+          Pexp_apply(
+            {pexp_desc: Pexp_send(p0, "is"), pexp_loc: applyLoc, pexp_attributes: applyAttributes},
+            expressions,
+          ),
+        pexp_loc: exprLoc,
+        pexp_attributes: expAttributes,
+      } =>
+      switch (List.hd(expressions) |> snd) {
+      | {
+          pexp_desc: Pexp_ident({txt: classTypeIdent, loc: identLoc}),
+          pexp_loc: identExprLoc,
+          pexp_attributes: identExprAttributes,
+        } =>
+        let classTypeIdentPath = identToList(classTypeIdent, []);
+        let moduleTypeIdent = listToIdent((classTypeIdentPath |> List.rev |> List.tl |> List.rev) @ ["classType"]);
+
+        let identExpr = {
+          pexp_desc: Pexp_ident({txt: moduleTypeIdent, loc: identLoc}),
+          pexp_loc: identExprLoc,
+          pexp_attributes: identExprAttributes,
+        };
+
+        let expr =
+          Exp.mk(
+            ~loc=exprLoc,
+            ~attrs=expAttributes,
+            Pexp_apply(
+              {pexp_desc: Pexp_send(p0, "is"), pexp_loc: applyLoc, pexp_attributes: applyAttributes},
+              [("", identExpr), ...List.tl(expressions)],
+            ),
+          );
+
+        default_mapper.expr(mapper, expr);
+      | other => patternFail(~exprLoc, "@lang.class check any#is")
+      }
+    | {
+        pexp_desc:
+          Pexp_apply(
+            {pexp_desc: Pexp_send(p0, "cast"), pexp_loc: applyLoc, pexp_attributes: applyAttributes},
+            expressions,
+          ),
+        pexp_loc: exprLoc,
+        pexp_attributes: expAttributes,
+      } =>
+      switch (List.hd(expressions) |> snd) {
+      | {
+          pexp_desc: Pexp_ident({txt: classTypeIdent, loc: identLoc}),
+          pexp_loc: identExprLoc,
+          pexp_attributes: identExprAttributes,
+        } =>
+        let classTypeIdentPath = identToList(classTypeIdent, []);
+        let moduleTypeIdent = listToIdent((classTypeIdentPath |> List.rev |> List.tl |> List.rev) @ ["classType"]);
+
+        let identExpr = {
+          pexp_desc: Pexp_ident({txt: moduleTypeIdent, loc: identLoc}),
+          pexp_loc: identExprLoc,
+          pexp_attributes: identExprAttributes,
+        };
+
+        let expr =
+          Exp.mk(
+            ~loc=exprLoc,
+            ~attrs=expAttributes,
+            Pexp_apply(
+              {pexp_desc: Pexp_send(p0, "is"), pexp_loc: applyLoc, pexp_attributes: applyAttributes},
+              [("", identExpr), ...List.tl(expressions)],
+            ),
+          );
+
+        default_mapper.expr(mapper, expr);
+      | other => patternFail(~exprLoc, "@lang.class check any#is")
+      }
     | other => default_mapper.expr(mapper, other)
     },
   structure_item: (mapper, structure_item) =>
@@ -282,7 +353,7 @@ let langMapper = argv => {
           switch (list) {
           | [] => acc
           | [{pcf_desc: Pcf_inherit(_, {pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, ...tail] =>
-            let identPaths = identPathToList(identPath, []);
+            let identPaths = identToList(identPath, []);
             let inheritClass = String.concat(".", identPaths);
             print_endline("inherit: " ++ inheritClass);
             procInheritance(tail, [identPaths, ...acc]);
@@ -324,9 +395,9 @@ let langMapper = argv => {
           |> List.flatten;
 
         let inheritanceClassFields = [
-          mkMethodOverrideSimpleStri("classInheritance", buildLongident(["inheritance"]), nameLoc),
-          mkMethodOverrideSimpleStri("classId", buildLongident(["id"]), nameLoc),
-          mkMethodOverrideSimpleStri("className", buildLongident(["name"]), nameLoc),
+          mkMethodOverrideSimpleStri("classInheritance", listToIdent(["inheritance"]), nameLoc),
+          mkMethodOverrideSimpleStri("classId", listToIdent(["id"]), nameLoc),
+          mkMethodOverrideSimpleStri("className", listToIdent(["name"]), nameLoc),
         ];
 
         let beginPart =
