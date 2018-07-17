@@ -383,16 +383,18 @@ let langMapper = argv => {
         let rec procInheritance = (list, acc) =>
           switch (list) {
           | [] => acc
-          | [{pcf_desc: Pcf_inherit(_, {pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, ...tail] =>
-            let identPaths = identToList(identPath, []);
-            let inheritClass = String.concat(".", identPaths);
-            print_endline("inherit: " ++ inheritClass);
-            procInheritance(tail, [identPaths, ...acc]);
-
           | [
               {
                 pcf_desc:
-                  Pcf_inherit(_, {pcl_desc: Pcl_apply({pcl_desc: Pcl_constr({txt: identPath}, [])}, _)}, _),
+                  Pcf_inherit(
+                    _,
+                    {
+                      pcl_desc:
+                        Pcl_constr({txt: identPath}, []) |
+                        Pcl_apply({pcl_desc: Pcl_constr({txt: identPath}, [])}, _),
+                    },
+                    _,
+                  ),
               },
               ...tail,
             ] =>
