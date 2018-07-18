@@ -44,3 +44,11 @@ module OptionsParams = {
 };
 
 OptionsParams.(print_endline(default |. accept |. Belt.Option.getWithDefault("---")));
+
+/* let testVariance = (p0:TestClass.ClassType.variant) =>{
+  ();
+
+  print_endline("testVariance: ok");
+};
+
+testVariance(Person.ClassType.PersonClass(person)); */
