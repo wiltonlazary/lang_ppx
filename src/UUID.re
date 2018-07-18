@@ -364,3 +364,5 @@ let print = pp_string; /* deprecated */
    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   ---------------------------------------------------------------------------*/
+
+let makeV4 = () => to_string(v(`V4));

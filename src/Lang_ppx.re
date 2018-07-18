@@ -5,8 +5,6 @@ open Ast_helper;
 open Asttypes;
 open Longident;
 
-let uuid = () => Uuid.to_string(Uuid.v(`V4));
-
 let getSome = opt =>
   switch (opt) {
   | Some(x) => x
@@ -446,7 +444,7 @@ let langMapper = argv => {
         let beginPart =
           [@metaloc nameLoc]
           [%str
-            let classId =  [%e stringToExpr(classNameStr ++ " | " ++ uuid() ++ " | ")] ++ __LOC__ ;
+            let classId =  [%e stringToExpr(classNameStr ++ " | " ++ UUID.makeV4() ++ " | ")] ++ __LOC__ ;
             let className = [%e stringToExpr(classNameStr)];
             let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
             Hashtbl.add(classInheritance, classId, className)
