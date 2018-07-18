@@ -79,7 +79,8 @@ module Any = {
 
 module VariantTypeFunctor1 = (SubjectVariant: VariantType) => {
   type Type.variant +=
-    | Variance(SubjectVariant.t);
+    | Variance1(SubjectVariant.t);
+ 
 
   class xx = {
     pub name = "000";
@@ -94,13 +95,16 @@ module VariantTypeFunctor2 = (SubjectVariant: VariantType) => {
   };
 
   type Any.ClassType.variant +=
-    | Variance(SubjectVariant.t);
+    | Variance2(SubjectVariant.t);
 };
 
 module TestGenerativeFununctor = (()) => {
   class t = {
     pub namez = "kkk";
   };
+
+  type Any.ClassType.variant +=
+    | Variance3(t);
 
   include VariantTypeFunctor2({
     class tx = class t;
@@ -111,4 +115,4 @@ module TestGenerativeFununctor = (()) => {
 module TestFun =
   TestGenerativeFununctor({});
 
-let xx = TestFun.Variance(new TestFun.t);
+let xx = TestFun.Variance2(new TestFun.t);
