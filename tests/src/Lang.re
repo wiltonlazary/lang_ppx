@@ -1,7 +1,7 @@
 external identity : 'a => 'b = "%identity";
 include Belt;
 
-module type VariantType = {type t;};
+module type VariantType = {type variant = ..;};
 
 module type AnyClassType = {
   type variant = ..;
@@ -63,12 +63,9 @@ module Any = {
     };
 
     /* extensible variant type */
-    type variant = ..;
+    type variant = Type.variant = ..;
 
     type Type.variant +=
-      | AnyClass(t);
-
-    type variant +=
       | AnyClass(t);
   };
 
@@ -76,43 +73,3 @@ module Any = {
 
   class t = class ClassType.t;
 };
-
-module VariantTypeFunctor1 = (SubjectVariant: VariantType) => {
-  type Type.variant +=
-    | Variance1(SubjectVariant.t);
- 
-
-  class xx = {
-    pub name = "000";
-  };
-};
-
-module VariantTypeFunctor2 = (SubjectVariant: VariantType) => {
-  include VariantTypeFunctor1(SubjectVariant);
-
-  class zz = {
-    pub name = "000";
-  };
-
-  type Any.ClassType.variant +=
-    | Variance2(SubjectVariant.t);
-};
-
-module TestGenerativeFununctor = (()) => {
-  class t = {
-    pub namez = "kkk";
-  };
-
-  type Any.ClassType.variant +=
-    | Variance3(t);
-
-  include VariantTypeFunctor2({
-    class tx = class t;
-    class t = class tx;
-  });
-};
-
-module TestFun =
-  TestGenerativeFununctor({});
-
-let xx = TestFun.Variance2(new TestFun.t);

@@ -46,9 +46,72 @@ module OptionsParams = {
 OptionsParams.(print_endline(default |. accept |. Belt.Option.getWithDefault("---")));
 
 /* let testVariance = (p0:TestClass.ClassType.variant) =>{
-  ();
+     ();
 
-  print_endline("testVariance: ok");
+     print_endline("testVariance: ok");
+   };
+
+   testVariance(Person.ClassType.PersonClass(person)); */
+
+module VariantTypeFunctor1 = (SubjectVariant: Lang.VariantType) => {
+  type Lang.Type.variant +=
+    | Variance1(int);
+
+  class xx = {
+    pub name = "000";
+  };
 };
 
-testVariance(Person.ClassType.PersonClass(person)); */
+module VariantTypeFunctor2 = (SubjectVariant: Lang.VariantType) => {
+  include VariantTypeFunctor1(SubjectVariant);
+
+  class zz = {
+    pub name = "000";
+  };
+
+  type Lang.Any.ClassType.variant +=
+    | Variance2(string);
+};
+
+module TestGenerativeFununctor = (()) => {
+  include VariantTypeFunctor2({
+    type variant = ..;
+    type variant  += | Variance3 ;
+
+    class t = {
+      pub namez = "kkk";
+      pub name1 = "kkk";
+    };
+  });
+
+  type Lang.Any.ClassType.variant +=
+    | Variance3(int);
+};
+
+module TestFun =
+  TestGenerativeFununctor({});
+
+/* let xx = TestFun.Variance3(new TestFun.t); */
+
+type xx('a) = ..;
+
+type xx('a) +=
+  | V1('a)
+  | V2(string)
+  | V3(xx('a));
+
+type xx('a) +=
+  | V4;
+
+type pp = xx(Person.t);
+
+let x = V3(V3(V1(person)));
+
+let tc = V3(V3(V1(testClass)));
+
+let proc = (a: pp) => a;
+
+let z = proc(x);
+
+/* type cc = ..; */
+type cc = [ | `V];
