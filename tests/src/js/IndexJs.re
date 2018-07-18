@@ -23,3 +23,6 @@ let () = {
   print_endline((Lang.identity(person2): TestClass.t)#personName2);
   testClass#test((person :> Lang.Any.t));
 };
+
+let this = {"addr": "127.0.0.1", "options": None};
+print_endline(this##addr);

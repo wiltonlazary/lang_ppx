@@ -23,3 +23,24 @@ let () = {
   print_endline((Lang.identity(person2): TestClass.t)#personName2);
   testClass#test((person :> Lang.Any.t));
 };
+
+module OptionsParams = {
+  [@bs.deriving abstract]
+  type t = {
+    [@bs.optional]
+    language: string,
+    [@bs.optional]
+    session: bool,
+    [@bs.optional]
+    op: string,
+    [@bs.optional]
+    processor: string,
+    [@bs.optional]
+    accept: string,
+  };
+
+  let default =
+    t(~language="gremlin-groovy", ~session=false, ~op="eval", ~processor="", ~accept="application/json", ());
+};
+
+OptionsParams.(print_endline(default |. accept |. Belt.Option.getWithDefault("---")));
