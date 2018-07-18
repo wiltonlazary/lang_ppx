@@ -58,6 +58,42 @@ let continuationExpr = expr => Exp.attr(expr, ({txt: "langcontinuation", loc: de
 let matchesCpsApply = id =>
   id == "await" || id == "delay" || id |> endsWith("Cps") || id |> endsWith("Await") || id |> endsWith("Delay");
 
+let mkTypeStri = (loc, ident, constructor, kindIdent) => {
+  pstr_desc:
+    Pstr_typext({
+      ptyext_path: {
+        txt: ident,
+        loc,
+      },
+      ptyext_params: [],
+      ptyext_constructors: [
+        {
+          pext_name: {
+            txt: constructor,
+            loc,
+          },
+          pext_kind:
+            [@implicit_arity]
+            Pext_decl(
+              [
+                {
+                  ptyp_desc: [@implicit_arity] Ptyp_constr({txt: kindIdent, loc}, []),
+                  ptyp_loc: loc,
+                  ptyp_attributes: [],
+                },
+              ],
+              None,
+            ),
+          pext_loc: loc,
+          pext_attributes: [],
+        },
+      ],
+      ptyext_private: Public,
+      ptyext_attributes: [],
+    }),
+  pstr_loc: loc,
+};
+
 let mkModuleStri = (name, loc, structure) => {
   pstr_loc: loc,
   pstr_desc:
@@ -365,7 +401,10 @@ let langMapper = argv => {
           pci_attributes: [({txt: "lang.class"}, payload)],
         } as _classDeclaration =>
         String.(
-          if (classNameStr |> length < 2 || classNameStr.[0] != '_' || classNameStr.[1] != (classNameStr.[1] |> Char.uppercase)) {
+          if (classNameStr
+              |> length < 2
+              || classNameStr.[0] != '_'
+              || classNameStr.[1] != (classNameStr.[1] |> Char.uppercase)) {
             raise(
               fail(
                 ~loc=nameLoc,
@@ -375,7 +414,8 @@ let langMapper = argv => {
           }
         );
 
-        let classNameStr = classNameStr.[0] == '_' ? String.sub(classNameStr, 1, String.length(classNameStr) - 1) : classNameStr;
+        let classNameStr =
+          classNameStr.[0] == '_' ? String.sub(classNameStr, 1, String.length(classNameStr) - 1) : classNameStr;
         print_endline("class_declaration: " ++ classNameStr);
 
         let rec procInheritance = (list, acc) =>
@@ -444,11 +484,21 @@ let langMapper = argv => {
         let beginPart =
           [@metaloc nameLoc]
           [%str
-            let classId =  [%e stringToExpr(classNameStr ++ " | " ++ UUID.makeV4() ++ " | ")] ++ __LOC__ ;
+            type variant = Lang.Any.ClassType.variant = ..;
+            let classId = [%e stringToExpr(classNameStr ++ " | " ++ UUID.makeV4() ++ " | ")] ++ __LOC__;
             let className = [%e stringToExpr(classNameStr)];
             let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
             Hashtbl.add(classInheritance, classId, className)
           ];
+
+        let moduleName = String.capitalize(classNameStr);
+        let variantConstructorName = moduleName ++ "Class";
+
+        let variantTypeAddPart = [
+          mkTypeStri(nameLoc, listToIdent(["variant"]), variantConstructorName, listToIdent(["t"])),
+          /* mkTypeStri(nameLoc, listToIdent(["Lang", "variant"]), variantConstructorName, listToIdent(["t"])),
+             mkTypeStri(nameLoc, listToIdent(["Lang", "Any", "ClassType", "variant"]), variantConstructorName, listToIdent(["t"])), */
+        ];
 
         let classDeclItem = [
           mkClassStri(
@@ -463,18 +513,21 @@ let langMapper = argv => {
         ];
 
         let classTypePart = [
-          mkModuleStri("ClassType", nameLoc, List.concat([beginPart, inheritanceAdd, classDeclItem])),
+          mkModuleStri(
+            "ClassType",
+            nameLoc,
+            List.concat([beginPart, inheritanceAdd, classDeclItem, variantTypeAddPart]),
+          ),
         ];
 
-        let endPart =
+        let classBindPart =
           [@metaloc nameLoc]
           [%str
             let classType: (module Lang.AnyClassType) = (module ClassType);
             class t = class ClassType.t
           ];
 
-        let structure_item =
-          mkModuleStri(String.capitalize(classNameStr), nameLoc, List.concat([classTypePart, endPart]));
+        let structure_item = mkModuleStri(moduleName, nameLoc, List.concat([classTypePart, classBindPart]));
         default_mapper.structure_item(mapper, structure_item);
       | _ => default_mapper.structure_item(mapper, structure_item)
       }
