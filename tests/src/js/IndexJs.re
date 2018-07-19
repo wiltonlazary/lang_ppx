@@ -1,28 +1,25 @@
 [@lang.class]
 class _Person (name: string, surName: string) = {
-  inherit class Lang.Any.t as super;
+  inherit class Lang.AnyClass.t as super;
   pub personName = name;
 };
 
 [@lang.class]
-class _TestClass = {
+class _Test = {
   as (this: 'this);
-  inherit (class Person.t)("wilton", "lazary") as super;
+  inherit (class PersonClass.t)("wilton", "lazary") as super;
   pub personName2 = "<<<<<wilton>>>>";
-  pub test = (a: Lang.Any.t) => {
+  pub test = (a: Lang.AnyClass.t) => {
     ();
-    print_endline(a#is(Lang.Any.t) |> string_of_bool);
+    print_endline(a#is(Lang.AnyClass.t) |> string_of_bool);
   };
 };
 
-let person = (new Person.t)("wilton", "lazary");
+let person = (new PersonClass.t)("wilton", "lazary");
 let testClass = new TestClass.t;
-let person2 = testClass#cast(Person.t);
+let person2 = testClass#cast(PersonClass.t);
 
 let () = {
   print_endline((Lang.identity(person2): TestClass.t)#personName2);
-  testClass#test((person :> Lang.Any.t));
+  testClass#test((person :> Lang.AnyClass.t));
 };
-
-let this = {"addr": "127.0.0.1", "options": None};
-print_endline(this##addr);

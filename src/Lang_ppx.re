@@ -1,11 +1,11 @@
 [@ocaml.ppx.context {cookies: []}];
 
 module Mapper = {
-  open  Parsetree;
-  open  Ast_mapper;
-  open  Ast_helper;
-  open  Asttypes;
-  open  Longident;
+  open Parsetree;
+  open Ast_mapper;
+  open Ast_helper;
+  open Asttypes;
+  open Longident;
 
   let getSome = opt =>
     switch (opt) {
@@ -540,7 +540,7 @@ module Mapper = {
       },
   };
 };
- 
+
 let () = {
   print_endline("lang_ppx: started");
   Ast_mapper.register("lang_ppx", Mapper.mapper);
