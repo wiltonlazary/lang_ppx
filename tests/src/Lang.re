@@ -3,7 +3,7 @@ include Belt;
 
 module type AbstractType = {type t;};
 
-module type VariantType = {type variant('a) = ..;};
+module type VariantType = {type variant = ..;};
 
 module type AnyClassType = {
   include AbstractType;
@@ -14,11 +14,13 @@ module type AnyClassType = {
 };
 
 module Type = {
-  type variant('a) = ..;
+  type variant = ..;
 };
 
-module Any = {
-  module ClassType = {
+module AnyClass = {
+  module Type = {
+    /* extensible variant type */
+    type variant = Type.variant = ..;
     let classId = "Any | 7a2d25ba-4e76-4144-b28e-7a41f3661d90 | " ++ __LOC__;
     let className = "Any";
     let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
@@ -64,14 +66,11 @@ module Any = {
       pub cast = [@lang.safecast] (() => ());
     };
 
-    type Type.variant('a) +=
-      | AnyClass(t);
-
-    /* extensible variant type */
-    type variant('a) = ..;
+    type variant +=
+      | AnyClassVariant(t);
   };
 
-  let classType: (module AnyClassType) = (module ClassType);
+  let classType: (module AnyClassType) = (module Type);
 
-  class t = class ClassType.t;
+  class t = class Type.t;
 };

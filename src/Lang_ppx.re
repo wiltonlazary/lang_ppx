@@ -459,7 +459,7 @@ let langMapper = argv => {
 
         let (classInheritance, implicitInheritanceFields) =
           if (classInheritance |> List.length == 0) {
-            ([["Lang", "Any", "t"]], [mkInheritLangAny(nameLoc)]);
+            ([["Lang", "AnyClass", "t"]], [mkInheritLangAny(nameLoc)]);
           } else {
             (classInheritance, []);
           };
@@ -467,7 +467,7 @@ let langMapper = argv => {
         let inheritanceAdd =
           classInheritance
           |> List.map(it => {
-               let classTypePath = (it |> List.rev |> List.tl |> List.rev) @ ["ClassType"];
+               let classTypePath = (it |> List.rev |> List.tl |> List.rev) @ ["Type"];
                let inheritanceIdent = buildIdentExpr(classTypePath @ ["classInheritance"], nameLoc);
 
                %str
@@ -484,20 +484,23 @@ let langMapper = argv => {
         let beginPart =
           [@metaloc nameLoc]
           [%str
-            type variant = Lang.Any.ClassType.variant = ..;
+            type variant = Lang.AnyClass.Type.variant = ..;
             let classId = [%e stringToExpr(classNameStr ++ " | " ++ UUID.makeV4() ++ " | ")] ++ __LOC__;
             let className = [%e stringToExpr(classNameStr)];
             let classInheritance: Hashtbl.t(string, string) = Hashtbl.create(10);
             Hashtbl.add(classInheritance, classId, className)
           ];
 
-        let moduleName = String.capitalize(classNameStr);
-        let variantConstructorName = moduleName ++ "Class";
+        let moduleName = String.capitalize(classNameStr) ++ "Class";
+        let variantConstructorName = moduleName ++ "Variant";
 
         let variantTypeAddPart = [
-          mkTypeStri(nameLoc, listToIdent(["variant"]), variantConstructorName, listToIdent(["t"])),
-          /* mkTypeStri(nameLoc, listToIdent(["Lang", "variant"]), variantConstructorName, listToIdent(["t"])),
-             mkTypeStri(nameLoc, listToIdent(["Lang", "Any", "ClassType", "variant"]), variantConstructorName, listToIdent(["t"])), */
+          mkTypeStri(
+            nameLoc,
+            listToIdent(["Lang", "AnyClass", "Type", "variant"]),
+            variantConstructorName,
+            listToIdent(["t"]),
+          ),
         ];
 
         let classDeclItem = [
@@ -514,7 +517,7 @@ let langMapper = argv => {
 
         let classTypePart = [
           mkModuleStri(
-            "ClassType",
+            "Type",
             nameLoc,
             List.concat([beginPart, inheritanceAdd, classDeclItem, variantTypeAddPart]),
           ),
@@ -523,8 +526,8 @@ let langMapper = argv => {
         let classBindPart =
           [@metaloc nameLoc]
           [%str
-            let classType: (module Lang.AnyClassType) = (module ClassType);
-            class t = class ClassType.t
+            let classType: (module Lang.AnyClassType) = (module Type);
+            class t = class Type.t
           ];
 
         let structure_item = mkModuleStri(moduleName, nameLoc, List.concat([classTypePart, classBindPart]));
