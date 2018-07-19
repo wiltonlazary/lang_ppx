@@ -1,18 +1,20 @@
 external identity : 'a => 'b = "%identity";
 include Belt;
 
-module type VariantType = {type variant = ..;};
+module type AbstractType = {type t;};
+
+module type VariantType = {type variant('a) = ..;};
 
 module type AnyClassType = {
-  type variant = ..;
-  type t;
+  include AbstractType;
+  include VariantType;
   let classId: string;
   let className: string;
   let classInheritance: Hashtbl.t(string, string);
 };
 
 module Type = {
-  type variant = ..;
+  type variant('a) = ..;
 };
 
 module Any = {
@@ -62,11 +64,11 @@ module Any = {
       pub cast = [@lang.safecast] (() => ());
     };
 
-    /* extensible variant type */
-    type variant = Type.variant = ..;
-
-    type Type.variant +=
+    type Type.variant('a) +=
       | AnyClass(t);
+
+    /* extensible variant type */
+    type variant('a) = ..;
   };
 
   let classType: (module AnyClassType) = (module ClassType);
