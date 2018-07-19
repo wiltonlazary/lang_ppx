@@ -4,7 +4,7 @@ unset GIT_WORK_TREE
 unset GIT_DIR
 base=$(pwd)
 
-ocamlVersion="4.02.3+buckle-master"
+ocamlVersion="4.02.3+buckle-master" #"4.07.0+trunk"
 nodeVersion="10.6.0"
 
 opam init --y
